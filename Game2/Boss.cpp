@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Utility2.h"
 #include "Brave.h"
 #include "Boss.h"
 

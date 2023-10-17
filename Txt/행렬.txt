@@ -1,0 +1,34 @@
+행(row)렬(column)
+
+영행렬
+0
+
+단위행렬
+1
+
+역행렬
+1/A 
+
+
+전치행렬
+행과 열을 뒤집은 행렬 (4x3 -> 3x4)
+
+
+행렬의 곱연산
+교환 법칙 AB != BA 이 성립되지않는다.
+
+
+Scalling Matrix
+
+Sx	0	0	0
+0	Sy	0	0
+0	0	Sz	0
+0	0	0	1
+
+
+Translation Matrix
+
+1	0	0	0
+0	1	0	0
+0	0	1	0
+Tx	Ty	Tz	1

@@ -23,11 +23,17 @@
     <ClInclude Include="Brave.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Unit.h" />
+    <ClInclude Include="Utility2.h" />
+    <ClInclude Include="Zealot.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Boss.cpp" />
     <ClCompile Include="Brave.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Unit.cpp" />
+    <ClCompile Include="Utility2.cpp" />
+    <ClCompile Include="Zealot.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

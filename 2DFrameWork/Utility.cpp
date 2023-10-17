@@ -2,19 +2,19 @@
 
 Utility::RECT::RECT(Vector2 pivot, Vector2 scale)
 {
-    min.x = pivot.x - scale.x * 0.5f;
-    min.y = pivot.y - scale.y * 0.5f;
-    max.x = pivot.x + scale.x * 0.5f;
-    max.y = pivot.y + scale.y * 0.5f;
+    min.x = pivot.x - abs(scale.x) * 0.5f;
+    min.y = pivot.y - abs(scale.y) * 0.5f;
+    max.x = pivot.x + abs(scale.x) * 0.5f;
+    max.y = pivot.y + abs(scale.y) * 0.5f;
 }
 
 Utility::RECT::RECT(GameObject* ob)
 {
     Vector2 pivot = ob->GetWorldPivot();
-    min.x = pivot.x - ob->GetScale().x * 0.5f;
-    min.y = pivot.y - ob->GetScale().y * 0.5f;
-    max.x = pivot.x + ob->GetScale().x * 0.5f;
-    max.y = pivot.y + ob->GetScale().y * 0.5f;
+    min.x = pivot.x - abs(ob->GetScale().x) * 0.5f;
+    min.y = pivot.y - abs(ob->GetScale().y) * 0.5f;
+    max.x = pivot.x + abs(ob->GetScale().x) * 0.5f;
+    max.y = pivot.y + abs(ob->GetScale().y) * 0.5f;
 }
 
 Utility::CIRCLE::CIRCLE(Vector2 pivot, Vector2 scale)

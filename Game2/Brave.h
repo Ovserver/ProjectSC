@@ -2,14 +2,6 @@
 
 #define TRAILMAX 12
 
-//오른아래쪽부터 반시계방향
-enum DirState
-{
-	LB,B,RB,
-	R,RT,T,
-	LT,L
-};
-
 enum class BraveState
 {
 	IDLE,

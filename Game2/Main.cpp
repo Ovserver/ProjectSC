@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "Utility2.h"
+#include "Unit.h"
 #include "Brave.h"
 #include "Boss.h"
 #include "Main.h"
-
 Main::Main()
 {
 
@@ -35,22 +36,24 @@ void Main::Init()
 	cursorDrag.SetScale().x = cursorDrag.imageSize.x * IMGSCALE;
 	cursorDrag.SetScale().y = cursorDrag.imageSize.y * IMGSCALE;
 
-	cursorMoveScreen[0].LoadFile(L"cursor/ScreenPullB.png");
-	cursorMoveScreen[1].LoadFile(L"cursor/ScreenPullLB.png");
-	cursorMoveScreen[2].LoadFile(L"cursor/ScreenPullL.png");
-	cursorMoveScreen[3].LoadFile(L"cursor/ScreenPullLT.png");
-	cursorMoveScreen[4].LoadFile(L"cursor/ScreenPullT.png");
-	cursorMoveScreen[5].LoadFile(L"cursor/ScreenPullRT.png");
-	cursorMoveScreen[6].LoadFile(L"cursor/ScreenPullR_offset.png");
-	cursorMoveScreen[7].LoadFile(L"cursor/ScreenPullRB.png");
-	cursorMoveScreen[0].SetPivot() = OFFSET_B;
-	cursorMoveScreen[1].SetPivot() = OFFSET_LB;
-	cursorMoveScreen[2].SetPivot() = OFFSET_L;
-	cursorMoveScreen[3].SetPivot() = OFFSET_LT;
-	cursorMoveScreen[4].SetPivot() = OFFSET_T;
-	cursorMoveScreen[5].SetPivot() = OFFSET_RT;
-	cursorMoveScreen[6].SetPivot() = OFFSET_R;
-	cursorMoveScreen[7].SetPivot() = OFFSET_RB;
+	int n = 0;
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullB.png");
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullLB.png");
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullL.png");
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullLT.png");
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullT.png");
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullRT.png");
+	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullR_offset.png");
+	cursorMoveScreen[n].LoadFile(L"cursor/ScreenPullRB.png");
+	n = 0;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_B;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_LB;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_L;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_LT;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_T;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_RT;
+	cursorMoveScreen[n++].SetPivot() = OFFSET_R;
+	cursorMoveScreen[n].SetPivot() = OFFSET_RB;
 
 	for (size_t i = 0; i < 8; i++)
 	{
@@ -73,30 +76,52 @@ void Main::Init()
 	SelectArea.SetScale().x = 100.0f;
 	SelectArea.SetScale().y = 100.0f;
 	SelectArea.SetPivot() = OFFSET_LB;
+
+	SelectAreaCol.SetScale().x = 100.0f;
+	SelectAreaCol.SetScale().y = 100.0f;
+	SelectAreaCol.SetPivot() = OFFSET_LB;
+
 	app.maincam->viewport.x = 0;
 	app.maincam->viewport.y = 0;
 	app.maincam->viewport.width = app.GetWidth();
 	app.maincam->viewport.height = app.GetHeight();
+	app.maincam->SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
+
 	cam2.viewport.x = 0;
 	cam2.viewport.y = 0;
 	cam2.viewport.width = app.GetWidth();
 	cam2.viewport.height = app.GetHeight();
 	cam2.UpdateMatrix();
+
+	TestBox.SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
+	TestBox.SetScale().x = 100.0f;
+	TestBox.SetScale().y = 100.0f;
 }
 
 void Main::Release()
 {
 }
-bool showCursor = false;
-bool showTileMap = true;
 void Main::Update()
 {
+	if (INPUT->KeyDown(VK_F1))
+		Utility2::ShowCollider = !Utility2::ShowCollider;
 	if (INPUT->KeyDown(VK_F2))
 		ShowCursor(showCursor = !showCursor);
 	if (INPUT->KeyDown(VK_F3))
 		showTileMap = !showTileMap;
+	if (INPUT->KeyDown(VK_F5))
+	{
+		Unit* temp = new Unit();
+		temp->SetWorldPos(INPUT->GetWorldMousePos());
+		UnitPool.push_back(temp);
+	}
 	mainPlayer.Update();
+	for (size_t i = 0; i < UnitPool.size(); i++)
+	{
+		UnitPool[i]->Update();
+	}
 	boss.Update(mainPlayer.GetWorldPos());
+
 	if (INPUT->KeyPress(VK_LEFT))
 	{
 		app.maincam->MoveWorldPos(LEFT * 1000 * DELTA);
@@ -123,6 +148,32 @@ void Main::LateUpdate()
 		startDragPos = INPUT->GetScreenMousePos();
 		SelectArea.SetWorldPos(Vector2(-app.GetHalfWidth() + startDragPos.x,
 			app.GetHalfHeight() - startDragPos.y));
+		SelectAreaCol.SetWorldPos(app.maincam->GetWorldPos() + SelectArea.GetWorldPos());
+	}	
+	if (INPUT->KeyPress(VK_LBUTTON))
+	{
+		SelectArea.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
+		SelectArea.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
+
+		SelectAreaCol.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
+		SelectAreaCol.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
+
+		if (SelectAreaCol.Intersect(&TestBox))
+		{
+			cout << "ccooooooollll" << endl;
+		}
+		for (size_t i = 0; i < UnitPool.size(); i++)
+		{		
+			if (SelectAreaCol.Intersect(&UnitPool[i]->col))
+			{
+				cout << "ccooooooollll" << endl;
+				UnitPool[i]->col.color = Color(0, 1, 0);
+			}
+			else
+			{
+				UnitPool[i]->col.color = Color(1, 1, 1);
+			}
+		}
 	}
 	else
 	{
@@ -140,7 +191,7 @@ void Main::LateUpdate()
 			MoveDownScreen = true;
 			app.maincam->MoveWorldPos(DOWN * 1000 * DELTA);
 		}
-		else 
+		else
 		{
 			MoveDownScreen = false;
 		}
@@ -149,7 +200,7 @@ void Main::LateUpdate()
 			MoveLeftScreen = true;
 			app.maincam->MoveWorldPos(LEFT * 1000 * DELTA);
 		}
-		else 
+		else
 		{
 			MoveLeftScreen = false;
 		}
@@ -158,19 +209,29 @@ void Main::LateUpdate()
 			MoveRightScreen = true;
 			app.maincam->MoveWorldPos(RIGHT * 1000 * DELTA);
 		}
-		else 
+		else
 		{
 			MoveRightScreen = false;
 		}
 	}
-	if (INPUT->KeyPress(VK_LBUTTON))
-	{
-		SelectArea.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
-		SelectArea.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
-	}
 	if (INPUT->KeyUp(VK_LBUTTON))
 	{
 		startDragPos = Vector2(0, 0);
+		UnitPoolSelect.clear();
+		for (size_t i = 0; i < UnitPool.size(); i++)
+		{
+			if (SelectAreaCol.Intersect(&UnitPool[i]->col))
+			{
+				if (UnitPoolSelect.size() < 12)
+					UnitPoolSelect.push_back(UnitPool[i]);
+				else
+					UnitPool[i]->col.color = Color(1, 1, 1);
+			}
+			else
+			{
+				UnitPool[i]->col.color = Color(1, 1, 1);
+			}
+		}
 	}
 	if (map.GetTileState((mainPlayer.GetFoot())) == TILE_NONE)
 	{
@@ -180,8 +241,11 @@ void Main::LateUpdate()
 	{
 		mainPlayer.StepBack();
 	}
-	ImGui::Text("%f %f", startDragPos.x, startDragPos.y);
-	ImGui::Text("%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
+	ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
+	ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
+	ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
+	ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
+	ImGui::Text("Unit Pool Selected\n%d", UnitPoolSelect.size());
 
 	if (INPUT->KeyDown(VK_RBUTTON))
 	{
@@ -189,17 +253,24 @@ void Main::LateUpdate()
 		{
 			mainPlayer.InitPath(way);
 		}
-	}
-	if (boss.activeFind)
-	{
-		if (TIMER->GetTick(intervalTime, 1.5f))
+		for (size_t i = 0; i < UnitPoolSelect.size(); i++)
 		{
-			if (map.PathFinding(boss.GetWorldPos(), mainPlayer.GetWorldPos(), way))
+			if (map.PathFinding(UnitPoolSelect[i]->col.GetWorldPos(), INPUT->GetWorldMousePos(), way))
 			{
-				boss.InitPath(way);
+				UnitPoolSelect[i]->InitPath(way);
 			}
 		}
 	}
+	//if (boss.activeFind)
+	//{
+	//	if (TIMER->GetTick(intervalTime, 1.5f))
+	//	{
+	//		if (map.PathFinding(boss.GetWorldPos(), mainPlayer.GetWorldPos(), way))
+	//		{
+	//			boss.InitPath(way);
+	//		}
+	//	}
+	//}
 	for (int i = 0; i < way.size(); i++)
 	{
 		ImGui::Text("%d path  X : %f Y : %f", i, way[i]->Pos.x, way[i]->Pos.y);
@@ -210,8 +281,15 @@ void Main::Render()
 	mapImage.Render();
 	if (showTileMap)
 		map.Render();
+	for (size_t i = 0; i < UnitPool.size(); i++)
+	{
+		UnitPool[i]->Render();
+	}
 	mainPlayer.Render();
 	boss.Render();
+
+	TestBox.Render();
+
 	console.Render(&cam2);
 	if (INPUT->KeyPress(VK_LBUTTON))
 	{

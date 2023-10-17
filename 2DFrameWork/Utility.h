@@ -68,6 +68,5 @@ namespace Utility
     {
         return a + (b - a) * w;
     }
-
 };
 

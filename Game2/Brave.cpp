@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Utility2.h"
 #include "Brave.h"
 
 Brave::Brave()
@@ -115,7 +116,7 @@ void Brave::Update()
 		if (state == BraveState::IDLE)
 		{
 			walk.frame.y = lookDir(INPUT->GetWorldMousePos() - col.GetWorldPos());
-			// idle -> walk
+			// idle -> spriteMove
 			if (INPUT->KeyPress('W') or
 				INPUT->KeyPress('A') or
 				INPUT->KeyPress('S') or
@@ -151,7 +152,7 @@ void Brave::Update()
 			col.MoveWorldPos(keyDir * speed * DELTA);
 
 
-			// walk -> roll
+			// spriteMove -> spriteAttack
 			if (INPUT->KeyPress(VK_SPACE))
 			{
 				state = BraveState::ROLL;
@@ -163,7 +164,7 @@ void Brave::Update()
 			}
 
 
-			// walk -> idle
+			// spriteMove -> idle
 			if (not INPUT->KeyPress('W') and
 				not INPUT->KeyPress('A') and
 				not INPUT->KeyPress('S') and
@@ -205,7 +206,7 @@ void Brave::Update()
 				walk.isVisible = true;
 				roll.isVisible = false;
 				speed = 100.0f;
-				// roll -> walk
+				// spriteAttack -> spriteMove
 				if (INPUT->KeyPress('W') or
 					INPUT->KeyPress('A') or
 					INPUT->KeyPress('S') or
@@ -214,7 +215,7 @@ void Brave::Update()
 					state = BraveState::WALK;
 					walk.ChangeAnim(ANIMSTATE::LOOP, 0.1f);
 				}
-				// roll -> idle
+				// spriteAttack -> idle
 				else
 				{
 					state = BraveState::IDLE;
