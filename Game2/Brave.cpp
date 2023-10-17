@@ -16,7 +16,7 @@ Brave::Brave()
 	walk.SetScale().y = walk.imageSize.y / 8.0f * 4.0f;
 	col.SetScale() = walk.GetScale();
 
-	
+
 
 
 	roll.LoadFile(L"player_roll.png");
@@ -70,7 +70,7 @@ void Brave::Update()
 				return;
 			}
 			dir = pathWay.back()->Pos - col.GetWorldPos();
-			if (dir.Length() > 0.1f)
+			if (dir.Length() > speed * DELTA)
 			{
 				dir.Normalize();
 				col.MoveWorldPos(dir * speed * DELTA);
@@ -223,8 +223,6 @@ void Brave::Update()
 			}
 		}
 	}
-
-	app.maincam->SetWorldPos(col.GetWorldPos());
 }
 
 void Brave::Render()
@@ -242,6 +240,7 @@ void Brave::InitPath(vector<Tile*> way)
 {
 	pathWay = way;
 	pathfinding = true;
+	pathWay.pop_back();
 
 	state = BraveState::WALK;
 	walk.ChangeAnim(ANIMSTATE::LOOP, 0.1f);

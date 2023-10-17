@@ -1,5 +1,5 @@
 #pragma once
-
+#define TILESETNUM 2
 struct TileInt2
 {
     Int2    idx;
@@ -50,7 +50,7 @@ protected:
     ID3D11Buffer*           vertexBuffer;
 public:
     Int2                    tileSize;   //10x10 , 4x4 가로세로 타일이 몇개인가
-    ObImage*                tileImages[4]; //타일맵 안에서 사용될 이미지4장
+    ObImage*                tileImages[TILESETNUM]; //타일맵 안에서 사용될 이미지4장
     string                  file;    //저장될 이름
     vector<vector<Tile>>    Tiles;
 public:

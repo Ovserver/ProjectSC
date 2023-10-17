@@ -51,6 +51,7 @@ using namespace SimpleMath;
 #include "../Libs/Fmod/fmod.hpp"
 #pragma comment(lib, "../Libs/Fmod/fmodL_vc.lib")
 
+#define IMGSCALE 2.0f
 //Macro(Pascal)
 #define Check(hr)			{ assert(SUCCEEDED(hr)); }
 #define SafeRelease(p)		{ if(p){ (p)->Release(); (p) = nullptr; } }

@@ -3,18 +3,16 @@
 ObTileMap::ObTileMap()
 {
 	//타일 가로세로 갯수
-	tileSize.x = 20;
-	tileSize.y = 20;
+	tileSize.x = 4 * 128;
+	tileSize.y = 4 * 128;
 
 	//타일 한칸의 크기
-	scale = Vector2(50.0f, 50.0f);
+	scale = Vector2(32.0f, 32.0f) * IMGSCALE / 4.0f;
 	tileImages[0] = new ObImage();
 	tileImages[0]->LoadFile(L"Tile.png");
 	tileImages[0]->maxFrame = Int2(8, 6);
-
+	tileImages[0]->isFilled = false;
 	tileImages[1] = nullptr;
-	tileImages[2] = nullptr;
-	tileImages[3] = nullptr;
 
 	//정점
 	vertices = new VertexTile[tileSize.x * tileSize.y * 6];
@@ -78,7 +76,7 @@ void ObTileMap::Render(Camera* cam)
 	if (!isVisible)return;
 	GameObject::Render(cam);
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < TILESETNUM; i++)
 	{
 		if (tileImages[i])
 		{
@@ -248,7 +246,7 @@ void ObTileMap::Save()
 	fout.open(path.c_str(), ios::out);
 	if (fout.is_open())
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < TILESETNUM; i++)
 		{
 			fout << i << " ";
 			if (tileImages[i])

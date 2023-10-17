@@ -11,9 +11,11 @@ Main::~Main()
 {
 
 }
-
+ObImage mapImage;
 void Main::Init()
 {
+	ShowCursor(true);
+
 	LineX.color = Color(1.0f, 0.0f, 0.0f, 1.0f);
 	LineX.SetPivot() = OFFSET_N;
 	LineX.SetScale().x = 20000.0f;
@@ -36,15 +38,21 @@ void Main::Init()
 	tileMap.SetTile(Int2(1, 0), Int2(6, 3));
 	tileMap.UpdateBuffer();*/
 
+	mapImage.LoadFile(L"map.bmp");
+	mapImage.SetScale().x = mapImage.imageSize.x * IMGSCALE;
+	mapImage.SetScale().y = mapImage.imageSize.y * IMGSCALE;
+	mapImage.SetPivot() = OFFSET_LB;
 }
 
 void Main::Release()
 {
    
 }
-
+bool showCursor = true;
 void Main::Update()
 {
+	if (INPUT->KeyDown(VK_F2))
+		ShowCursor(showCursor = !showCursor);
 	ImGui::Begin("TileMap Editor");
 
 	Vector2 Pos = tileMap.GetWorldPos();
@@ -74,7 +82,7 @@ void Main::Update()
 		app.maincam->SetScale() = Scale;
 	}
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		string str = "Texture" + to_string(i);
 		if (GUI->FileImGui(str.c_str(), str.c_str(),
@@ -103,7 +111,7 @@ void Main::Update()
 			tileMap.tileImages[i]->LoadFile(wImgFile);
 			break;
 		}
-		if (i < 3)
+		if (i < 1)
 		{
 			ImGui::SameLine();
 		}
@@ -257,6 +265,7 @@ void Main::LateUpdate()
 
 void Main::Render()
 {
+	mapImage.Render();
 	LineX.Render();
 	LineY.Render();
 	tileMap.Render();

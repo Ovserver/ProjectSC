@@ -12,10 +12,13 @@ private:
 	//플레이어가 찾아가야될 경로
 	vector<Tile*> way;
 	ObImage	cursor;
+	ObImage cursorDrag;
+	ObImage cursorMoveScreen[8];
 	ObImage	console;
 	Camera	cam2;
 	ObRect  SelectArea;
 	Vector2	startDragPos;
+	ObImage	mapImage;
 public:
 	Main();
 	~Main();
