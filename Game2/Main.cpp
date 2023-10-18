@@ -99,6 +99,27 @@ void Main::Init()
 	TestBox.SetScale().y = 100.0f;
 
 	SSYSTEM->TileMap = &map;
+
+	IMOVE.LoadFile(L"icons/cmdiconsMove.png");
+	IMOVE.SetScale().x = IMOVE.imageSize.x * IMGSCALE;
+	IMOVE.SetScale().y = IMOVE.imageSize.y * IMGSCALE;
+	IMOVE.SetWorldPos(Vector2(-app.GetHalfWidth() + 1048, app.GetHalfHeight() - 750));
+	ISTOP.LoadFile(L"icons/cmdiconsStop.png");
+	ISTOP.SetScale().x = ISTOP.imageSize.x * IMGSCALE;
+	ISTOP.SetScale().y = ISTOP.imageSize.y * IMGSCALE;
+	ISTOP.SetWorldPos(Vector2(-app.GetHalfWidth() + 1140, app.GetHalfHeight() - 750));
+	IATTACK.LoadFile(L"icons/cmdiconsAttack.png");
+	IATTACK.SetScale().x = IATTACK.imageSize.x * IMGSCALE;
+	IATTACK.SetScale().y = IATTACK.imageSize.y * IMGSCALE;
+	IATTACK.SetWorldPos(Vector2(-app.GetHalfWidth() + 1232, app.GetHalfHeight() - 750));
+	IPATROL.LoadFile(L"icons/cmdiconsPatrol.png");
+	IPATROL.SetScale().x = IPATROL.imageSize.x * IMGSCALE;
+	IPATROL.SetScale().y = IPATROL.imageSize.y * IMGSCALE;
+	IPATROL.SetWorldPos(Vector2(-app.GetHalfWidth() + 1048, app.GetHalfHeight() - 830));
+	IHOLD.LoadFile(L"icons/cmdiconsHold.png");
+	IHOLD.SetScale().x = IHOLD.imageSize.x * IMGSCALE;
+	IHOLD.SetScale().y = IHOLD.imageSize.y * IMGSCALE;
+	IHOLD.SetWorldPos(Vector2(-app.GetHalfWidth() + 1140, app.GetHalfHeight() - 830));
 }
 
 void Main::Release()
@@ -145,14 +166,14 @@ void Main::Update()
 float intervalTime = 0;
 bool MoveLeftScreen = false, MoveRightScreen = false, MoveUpScreen = false, MoveDownScreen = false;
 void Main::LateUpdate()
-{	
+{
 	if (INPUT->KeyDown(VK_LBUTTON))
 	{
 		startDragPos = INPUT->GetScreenMousePos();
 		SelectArea.SetWorldPos(Vector2(-app.GetHalfWidth() + startDragPos.x,
 			app.GetHalfHeight() - startDragPos.y));
 		SelectAreaCol.SetWorldPos(app.maincam->GetWorldPos() + SelectArea.GetWorldPos());
-	}	
+	}
 	if (INPUT->KeyPress(VK_LBUTTON))
 	{
 		SelectArea.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
@@ -166,7 +187,7 @@ void Main::LateUpdate()
 			cout << "ccooooooollll" << endl;
 		}
 		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
-		{		
+		{
 			if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
 			{
 				cout << "ccooooooollll" << endl;
@@ -241,7 +262,7 @@ void Main::LateUpdate()
 	if (INPUT->KeyDown(VK_RBUTTON))
 	{
 		for (size_t i = 0; i < SSYSTEM->UnitPoolSelect.size(); i++)
-		{			
+		{
 			SSYSTEM->UnitPoolSelect[i]->Move(INPUT->GetWorldMousePos());
 			//if (map.PathFinding(SSYSTEM->UnitPoolSelect[i]->col.GetWorldPos(), INPUT->GetWorldMousePos(), way))
 			//{
@@ -266,6 +287,15 @@ void Main::LateUpdate()
 	ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
 	ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
 	ImGui::Text("Unit Pool Selected\n%d", SSYSTEM->UnitPoolSelect.size());
+	ImGui::Text("TileCol Unit\n");
+	for (size_t i = 0; i < SSYSTEM->TileMap->tileSize.y; i++)
+	{
+		for (size_t j = 0; j < SSYSTEM->TileMap->tileSize.x; j++)
+		{
+			if (SSYSTEM->TileMap->Tiles[j][i].tileColInfo == TileCol::UNIT)
+				ImGui::Text("%d %d\n", j, i);
+		}
+	}
 }
 void Main::Render()
 {
@@ -282,6 +312,11 @@ void Main::Render()
 	TestBox.Render();
 
 	console.Render(&cam2);
+	IMOVE.Render(&cam2);
+	IATTACK.Render(&cam2);
+	ISTOP.Render(&cam2);
+	IHOLD.Render(&cam2);
+	IPATROL.Render(&cam2);
 	if (INPUT->KeyPress(VK_LBUTTON))
 	{
 		cursorDrag.SetWorldPos(INPUT->GetWorldMousePos());

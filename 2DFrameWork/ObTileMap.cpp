@@ -412,20 +412,60 @@ void ObTileMap::CreateTileCost()
 
 bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 {
-	//둘중에 하나가 벽이면 갈 수 있는길이 없다.
-	if (Tiles[dest.x][dest.y].state == TILE_WALL or
-		Tiles[sour.x][sour.y].state == TILE_WALL or
-		Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
-	{
-		return false;
-	}
-	//기존에 있던 길은 전부 비운다.
-	way.clear();
-	//출발지 목적지 같으면
 	if (sour == dest)
 	{
 		return false;//제자리 멈추기
 	}
+	//둘중에 하나가 벽이면 갈 수 있는길이 없다.
+	if (Tiles[dest.x][dest.y].state == TILE_WALL ||
+		Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
+	{
+		bool flag = false;
+		int count = 1;
+		int i = count, j = count;
+		while (!flag)
+		{
+			if (count > 100) return false;
+			bool reverse = count % 2 == 0 ? true : false;
+			int icount = 0;
+			while (!flag && icount <= count)
+			{
+				if (!(Tiles[dest.x + i][dest.y + j].state == TILE_WALL ||
+					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::UNIT))
+				{
+					flag = true;
+				}
+				if (reverse) --i; else ++i;
+				++icount;
+				cout << icount << "icount ";
+			}
+			int jcount = 0;
+			while (!flag && jcount <= count)
+			{
+				if (!(Tiles[dest.x + i][dest.y + j].state == TILE_WALL ||
+					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::UNIT))
+				{
+					flag = true;
+				}
+				if (reverse) --j; else ++j;
+				++jcount;
+				cout << jcount << "jcount ";
+			}
+			++count;
+			cout << count;
+		}
+		if (flag) { cout << "searched\n"; }
+		dest.x += i; dest.y += j;
+	}
+	//if (Tiles[dest.x][dest.y].state == TILE_WALL ||
+	//	Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
+	//{
+	//	return false;
+	//}
+	//기존에 있던 길은 전부 비운다.
+	way.clear();
+	//출발지 목적지 같으면
+	
 
 	//타일 비용 초기화
 	for (int i = 0; i < tileSize.x; i++)

@@ -45,7 +45,10 @@ void Unit::Update()
 			if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), cmdPos, pathWay))
 			{
 				InitPath(pathWay);
-				cout << "pathupdate" << endl;
+			}
+			else
+			{
+				pathWay.clear();
 			}
 		}
 	}
@@ -109,6 +112,7 @@ void Unit::Move(Vector2 CommandPos)
 {
 	unitState = UnitState::MOVE;
 	cmdPos = CommandPos;
+	tickPathUpdateTime = PathUpdateTime;
 	cout << "Command Move " << endl;
 }
 
