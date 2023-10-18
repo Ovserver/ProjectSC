@@ -1,5 +1,20 @@
 #pragma once
 #define TILESETNUM 2
+
+enum TileState
+{
+    TILE_NONE,
+    TILE_WALL,
+    TILE_DOOR,
+    TILE_TRAP,
+    TILE_WATER,
+    TILE_SAND,
+    TILE_SIZE
+};
+enum class TileCol
+{
+    NONE, UNIT, BUILDING, NEUTRAL
+};
 struct TileInt2
 {
     Int2    idx;
@@ -16,13 +31,13 @@ public:
     Tile*       P;      //나를 갱신시킨 타일
     bool        isFind; //검사한적이 있는가?
 
-
+    TileCol     tileColInfo = TileCol::NONE;
     Int2        idx;    //타일 인덱스
     int         state;
     Vector2     Pos;
 
     void ClearCost();         //비용 초기화
-    void ClacCost(Int2 DestIdx); //H계산해라
+    void CalcCost(Int2 DestIdx); //H계산해라
 };
 struct compare
 {
@@ -31,18 +46,7 @@ struct compare
         return a->F > b->F;
     }
 };
-enum TileState
-{
-    TILE_NONE,
-    TILE_WALL,
-    TILE_DOOR,
-    TILE_TRAP,
-    TILE_WATER,
-    TILE_SAND,
-    //TILE_SAND1,
-    //TILE_SAND2,
-    TILE_SIZE
-};
+
 class ObTileMap : public GameObject
 {
 protected:
@@ -65,13 +69,17 @@ public:
     virtual bool        WorldPosToTileIdx(Vector2 WPos, Int2& TileIdx);
 
 
-    void UpdateBuffer(); 
+    void    UpdateBuffer();
     void    Save();
     virtual void    Load();
     virtual void    CreateTileCost();
     //                   타일인덱스
     int     GetTileState(Int2 TileIdx);
     int     GetTileState(Vector2 WorldPos);
+    TileCol GetTileCol(Vector2 WorldPos);
+    void    SetTileCol(TileCol setTileCol);
+    bool    SetTileCol(Vector2 WorldPos, TileCol tileCol);
+
     bool    PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way);
 
     bool    PathFinding(Vector2 sour, Vector2 dest, OUT vector<Tile*>& way);

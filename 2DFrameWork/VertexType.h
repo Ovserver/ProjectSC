@@ -39,7 +39,8 @@ struct VertexTile
     Vector2 uv;
     Color   color;
     float   tileMapIdx;
-    float   tileState;
+    float   tileState; //타일 정보 (ENUM값)
+    
 
     VertexTile()
     {

@@ -6,8 +6,6 @@ class Main : public Scene
 public:
 	bool			showCursor = false;
 	bool			showTileMap = true;
-	vector<Unit*>	UnitPool;
-	vector<Unit*>	UnitPoolSelect;
 public:
 	Main();
 	~Main();

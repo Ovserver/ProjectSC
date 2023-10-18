@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Utility2.h"
+#include "SystemManager.h"
 #include "Unit.h"
 #include "Brave.h"
 #include "Boss.h"
@@ -96,6 +97,8 @@ void Main::Init()
 	TestBox.SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
 	TestBox.SetScale().x = 100.0f;
 	TestBox.SetScale().y = 100.0f;
+
+	SSYSTEM->TileMap = &map;
 }
 
 void Main::Release()
@@ -113,36 +116,36 @@ void Main::Update()
 	{
 		Unit* temp = new Unit();
 		temp->SetWorldPos(INPUT->GetWorldMousePos());
-		UnitPool.push_back(temp);
+		SSYSTEM->UnitPool.push_back(temp);
 	}
 	mainPlayer.Update();
-	for (size_t i = 0; i < UnitPool.size(); i++)
+	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 	{
-		UnitPool[i]->Update();
+		SSYSTEM->UnitPool[i]->Update();
 	}
 	boss.Update(mainPlayer.GetWorldPos());
 
 	if (INPUT->KeyPress(VK_LEFT))
 	{
-		app.maincam->MoveWorldPos(LEFT * 1000 * DELTA);
+		app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);
 	}
 	if (INPUT->KeyPress(VK_RIGHT))
 	{
-		app.maincam->MoveWorldPos(RIGHT * 1000 * DELTA);
+		app.maincam->MoveWorldPos(RIGHT * 1200 * DELTA);
 	}
 	if (INPUT->KeyPress(VK_UP))
 	{
-		app.maincam->MoveWorldPos(UP * 1000 * DELTA);
+		app.maincam->MoveWorldPos(UP * 1200 * DELTA);
 	}
 	if (INPUT->KeyPress(VK_DOWN))
 	{
-		app.maincam->MoveWorldPos(DOWN * 1000 * DELTA);
+		app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
 	}
 }
 float intervalTime = 0;
 bool MoveLeftScreen = false, MoveRightScreen = false, MoveUpScreen = false, MoveDownScreen = false;
 void Main::LateUpdate()
-{
+{	
 	if (INPUT->KeyDown(VK_LBUTTON))
 	{
 		startDragPos = INPUT->GetScreenMousePos();
@@ -162,16 +165,16 @@ void Main::LateUpdate()
 		{
 			cout << "ccooooooollll" << endl;
 		}
-		for (size_t i = 0; i < UnitPool.size(); i++)
+		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{		
-			if (SelectAreaCol.Intersect(&UnitPool[i]->col))
+			if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
 			{
 				cout << "ccooooooollll" << endl;
-				UnitPool[i]->col.color = Color(0, 1, 0);
+				SSYSTEM->UnitPool[i]->col.color = Color(0, 1, 0);
 			}
 			else
 			{
-				UnitPool[i]->col.color = Color(1, 1, 1);
+				SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
 			}
 		}
 	}
@@ -180,7 +183,7 @@ void Main::LateUpdate()
 		if (INPUT->GetScreenMousePos().y < 10)
 		{
 			MoveUpScreen = true;
-			app.maincam->MoveWorldPos(UP * 1000 * DELTA);
+			app.maincam->MoveWorldPos(UP * 1200 * DELTA);
 		}
 		else
 		{
@@ -189,7 +192,7 @@ void Main::LateUpdate()
 		if (INPUT->GetScreenMousePos().y > app.GetHeight() - 10)
 		{
 			MoveDownScreen = true;
-			app.maincam->MoveWorldPos(DOWN * 1000 * DELTA);
+			app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
 		}
 		else
 		{
@@ -198,7 +201,7 @@ void Main::LateUpdate()
 		if (INPUT->GetScreenMousePos().x < 10)
 		{
 			MoveLeftScreen = true;
-			app.maincam->MoveWorldPos(LEFT * 1000 * DELTA);
+			app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);
 		}
 		else
 		{
@@ -207,7 +210,7 @@ void Main::LateUpdate()
 		if (INPUT->GetScreenMousePos().x > app.GetWidth() - 10)
 		{
 			MoveRightScreen = true;
-			app.maincam->MoveWorldPos(RIGHT * 1000 * DELTA);
+			app.maincam->MoveWorldPos(RIGHT * 1200 * DELTA);
 		}
 		else
 		{
@@ -217,21 +220,38 @@ void Main::LateUpdate()
 	if (INPUT->KeyUp(VK_LBUTTON))
 	{
 		startDragPos = Vector2(0, 0);
-		UnitPoolSelect.clear();
-		for (size_t i = 0; i < UnitPool.size(); i++)
+		SSYSTEM->UnitPoolSelect.clear();
+		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
-			if (SelectAreaCol.Intersect(&UnitPool[i]->col))
+			if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
 			{
-				if (UnitPoolSelect.size() < 12)
-					UnitPoolSelect.push_back(UnitPool[i]);
+				if (SSYSTEM->UnitPoolSelect.size() < 12)
+					SSYSTEM->UnitPoolSelect.push_back(SSYSTEM->UnitPool[i]);
 				else
-					UnitPool[i]->col.color = Color(1, 1, 1);
+					SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
 			}
 			else
 			{
-				UnitPool[i]->col.color = Color(1, 1, 1);
+				SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
 			}
 		}
+	}
+
+
+	if (INPUT->KeyDown(VK_RBUTTON))
+	{
+		for (size_t i = 0; i < SSYSTEM->UnitPoolSelect.size(); i++)
+		{			
+			SSYSTEM->UnitPoolSelect[i]->Move(INPUT->GetWorldMousePos());
+			//if (map.PathFinding(SSYSTEM->UnitPoolSelect[i]->col.GetWorldPos(), INPUT->GetWorldMousePos(), way))
+			//{
+			//	SSYSTEM->UnitPoolSelect[i]->InitPath(way);
+			//}
+		}
+	}
+	for (int i = 0; i < way.size(); i++)
+	{
+		ImGui::Text("%d path  X : %f Y : %f", i, way[i]->Pos.x, way[i]->Pos.y);
 	}
 	if (map.GetTileState((mainPlayer.GetFoot())) == TILE_NONE)
 	{
@@ -245,45 +265,16 @@ void Main::LateUpdate()
 	ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
 	ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
 	ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
-	ImGui::Text("Unit Pool Selected\n%d", UnitPoolSelect.size());
-
-	if (INPUT->KeyDown(VK_RBUTTON))
-	{
-		if (map.PathFinding(mainPlayer.GetWorldPos(), INPUT->GetWorldMousePos(), way))
-		{
-			mainPlayer.InitPath(way);
-		}
-		for (size_t i = 0; i < UnitPoolSelect.size(); i++)
-		{
-			if (map.PathFinding(UnitPoolSelect[i]->col.GetWorldPos(), INPUT->GetWorldMousePos(), way))
-			{
-				UnitPoolSelect[i]->InitPath(way);
-			}
-		}
-	}
-	//if (boss.activeFind)
-	//{
-	//	if (TIMER->GetTick(intervalTime, 1.5f))
-	//	{
-	//		if (map.PathFinding(boss.GetWorldPos(), mainPlayer.GetWorldPos(), way))
-	//		{
-	//			boss.InitPath(way);
-	//		}
-	//	}
-	//}
-	for (int i = 0; i < way.size(); i++)
-	{
-		ImGui::Text("%d path  X : %f Y : %f", i, way[i]->Pos.x, way[i]->Pos.y);
-	}
+	ImGui::Text("Unit Pool Selected\n%d", SSYSTEM->UnitPoolSelect.size());
 }
 void Main::Render()
 {
 	mapImage.Render();
 	if (showTileMap)
 		map.Render();
-	for (size_t i = 0; i < UnitPool.size(); i++)
+	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 	{
-		UnitPool[i]->Render();
+		SSYSTEM->UnitPool[i]->Render();
 	}
 	mainPlayer.Render();
 	boss.Render();

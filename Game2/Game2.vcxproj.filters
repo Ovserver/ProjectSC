@@ -8,6 +8,7 @@
     <ClInclude Include="Unit.h" />
     <ClInclude Include="Utility2.h" />
     <ClInclude Include="Zealot.h" />
+    <ClInclude Include="SystemManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -16,5 +17,6 @@
     <ClCompile Include="Unit.cpp" />
     <ClCompile Include="Utility2.cpp" />
     <ClCompile Include="Zealot.cpp" />
+    <ClCompile Include="SystemManager.cpp" />
   </ItemGroup>
 </Project>

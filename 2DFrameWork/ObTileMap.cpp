@@ -232,6 +232,40 @@ int ObTileMap::GetTileState(Vector2 WorldPos)
 	return TILE_SIZE;
 }
 
+TileCol ObTileMap::GetTileCol(Vector2 WorldPos)
+{
+	Int2 plIdx;
+	if (WorldPosToTileIdx(WorldPos, plIdx))
+	{
+		return Tiles[plIdx.x][plIdx.y].tileColInfo;
+	}
+	return TileCol::NEUTRAL;
+}
+
+void ObTileMap::SetTileCol(TileCol setTileCol)
+{
+	for (size_t i = 0; i < tileSize.y; i++)
+	{
+		for (size_t j = 0; j < tileSize.x; j++)
+		{
+			Tiles[i][j].tileColInfo = setTileCol;
+		}
+	}
+}
+
+bool ObTileMap::SetTileCol(Vector2 WorldPos, TileCol tileCol)
+{
+	Int2 plIdx;
+	if (WorldPosToTileIdx(WorldPos, plIdx))
+	{
+		Tiles[plIdx.x][plIdx.y].tileColInfo = tileCol;
+		return true;
+	}
+	return false;
+}
+
+
+
 void ObTileMap::UpdateBuffer()
 {
 	//vertices 를 vertexBuffer로 갱신
@@ -380,7 +414,8 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 {
 	//둘중에 하나가 벽이면 갈 수 있는길이 없다.
 	if (Tiles[dest.x][dest.y].state == TILE_WALL or
-		Tiles[sour.x][sour.y].state == TILE_WALL)
+		Tiles[sour.x][sour.y].state == TILE_WALL or
+		Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
 	{
 		return false;
 	}
@@ -407,7 +442,7 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 	//리스트에 출발지를 추가
 	Tile* pTemp = &Tiles[sour.x][sour.y];
 	pTemp->G = 0;       //출발지 현재비용은 0
-	pTemp->ClacCost(dest); //예상비용 만들기
+	pTemp->CalcCost(dest); //예상비용 만들기
 
 	List.push(pTemp);
 
@@ -456,8 +491,6 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 		//	{
 		//		LoopIdx.push_back(TileInt2(Int2(Temp->idx.x, Temp->idx.y + 1), 10));
 		//	}
-
-
 		//	//왼쪽 위쪽 타일이 존재할때
 		//	if (Temp->idx.x > 0 && Temp->idx.y > 0)
 		//	{
@@ -529,13 +562,13 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 			Tile* loop =
 				&Tiles[LoopIdx[i].idx.x][LoopIdx[i].idx.y];
 			//벽이 아닐때
-			if (loop->state != TILE_WALL)
+			if (loop->state != TILE_WALL && loop->tileColInfo == TileCol::NONE)
 			{
 				//현재 가지고있는 비용이 클때
 				if (loop->G > Temp->G + LoopIdx[i].cost)
 				{
 					loop->G = Temp->G + LoopIdx[i].cost;
-					loop->ClacCost(dest);
+					loop->CalcCost(dest);
 					//누구로부터 갱신인지 표시
 					loop->P = Temp;
 
@@ -588,7 +621,7 @@ void Tile::ClearCost()
 	isFind = false;
 }
 
-void Tile::ClacCost(Int2 DestIdx)
+void Tile::CalcCost(Int2 DestIdx)
 {
 	//너의 목적지까지의 예상비용을 계산해라
 	int tempX = abs(idx.x - DestIdx.x) * 10;

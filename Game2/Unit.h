@@ -23,10 +23,15 @@ public:
 	void SetWorldPos(Vector2 pos) { col.SetWorldPos(pos); }
 	Vector2 GetFoot() { return col.GetWorldPos() + Vector2(0, 10) + keyDir * 10.0f; }
 	void InitPath(vector<Tile*> way);
+
+	void Move(Vector2 CommandPos);
+	void Attack();
+	void Stop();
 public:
 	bool			pathfinding = false;
 	ObRect			col;
 	vector<Tile*>	pathWay;
+	Vector2			cmdPos;
 protected:
 	int				dirFrameY[8];
 	float			moveSpeed;
@@ -40,5 +45,8 @@ protected:
 	ObImage			spriteIdle;
 	ObImage			spriteMove;
 	ObImage			spriteAttack;
+private:
+	float			tickPathUpdateTime = 0;
+	const float		PathUpdateTime = 0.25f;
 };
 

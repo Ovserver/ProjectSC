@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Utility2.h"
+#include "SystemManager.h"
 #include "Unit.h"
 
 Unit::Unit()
@@ -29,10 +30,25 @@ Unit::Unit()
 	unitState = UnitState::IDLE;
 	col.SetScale() = spriteMove.GetScale();
 	moveSpeed = 200;
+
+	tickPathUpdateTime = PathUpdateTime;
 }
 
 void Unit::Update()
 {
+	if (unitState == UnitState::MOVE)
+	{
+		if (TIMER->GetTick(tickPathUpdateTime, PathUpdateTime))
+		{
+			vector<Tile*> temp;
+			SSYSTEM->UpdateTileCol();
+			if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), cmdPos, pathWay))
+			{
+				InitPath(pathWay);
+				cout << "pathupdate" << endl;
+			}
+		}
+	}
 	if (pathfinding)
 	{
 		if (pathWay.empty())
@@ -41,6 +57,7 @@ void Unit::Update()
 			unitState = UnitState::IDLE;
 			spriteMove.ChangeAnim(ANIMSTATE::STOP, 0.1f);
 			spriteMove.frame.x = 0;
+			tickPathUpdateTime = PathUpdateTime;
 			return;
 		}
 		moveDir = pathWay.back()->Pos - col.GetWorldPos();
@@ -86,6 +103,13 @@ void Unit::InitPath(vector<Tile*> way)
 
 	unitState = UnitState::MOVE;
 	spriteMove.ChangeAnim(ANIMSTATE::LOOP, 0.1f);
+}
+
+void Unit::Move(Vector2 CommandPos)
+{
+	unitState = UnitState::MOVE;
+	cmdPos = CommandPos;
+	cout << "Command Move " << endl;
 }
 
 int Unit::lookDir(Vector2 dir)
