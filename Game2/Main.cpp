@@ -15,37 +15,25 @@ Main::~Main()
 }
 void Main::Init()
 {
-	//map.file = "python.txt";
+	map.file = "python.txt";
 	map.Load();
 	map.CreateTileCost();
 	mainPlayer.SetWorldPos(Vector2(500, 500));
 	boss.SetWorldPos(Vector2(500, 500));
 
-	cursor.LoadFile(L"cursor/Idle.png");
-	cursor.maxFrame.x = 5;
-	cursor.SetScale().x = cursor.imageSize.x / 5.0f * IMGSCALE;
-	cursor.SetScale().y = cursor.imageSize.y * IMGSCALE;
+	Utility2::InitImage(cursor, L"cursor/Idle.png",Vector2(0,0), 5);
 	cursor.ChangeAnim(ANIMSTATE::LOOP, 0.1f);
-
-	//cursor.LoadFile(L"cursor/SelectMine.png");
-	//cursor.maxFrame.x = 14;
-	//cursor.SetScale().x = cursor.imageSize.x / 14.0f * IMGSCALE;
-	//cursor.SetScale().y = cursor.imageSize.y * IMGSCALE;
-	//cursor.ChangeAnim(ANIMSTATE::LOOP, 0.1f);
-
-	cursorDrag.LoadFile(L"cursor/Drag.png");
-	cursorDrag.SetScale().x = cursorDrag.imageSize.x * IMGSCALE;
-	cursorDrag.SetScale().y = cursorDrag.imageSize.y * IMGSCALE;
+	Utility2::InitImage(cursorDrag, L"cursor/Drag.png");
 
 	int n = 0;
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullB.png");
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullLB.png");
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullL.png");
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullLT.png");
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullT.png");
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullRT.png");
-	cursorMoveScreen[n++].LoadFile(L"cursor/ScreenPullR_offset.png");
-	cursorMoveScreen[n].LoadFile(L"cursor/ScreenPullRB.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullB.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLB.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullL.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLT.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullT.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRT.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullR_offset.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRB.png");
 	n = 0;
 	cursorMoveScreen[n++].SetPivot() = OFFSET_B;
 	cursorMoveScreen[n++].SetPivot() = OFFSET_LB;
@@ -57,21 +45,10 @@ void Main::Init()
 	cursorMoveScreen[n].SetPivot() = OFFSET_RB;
 
 	for (size_t i = 0; i < 8; i++)
-	{
-		cursorMoveScreen[i].maxFrame.x = 2;
-		cursorMoveScreen[i].SetScale().x = cursorMoveScreen[i].imageSize.x / 2.0f * IMGSCALE;
-		cursorMoveScreen[i].SetScale().y = cursorMoveScreen[i].imageSize.y * IMGSCALE;
 		cursorMoveScreen[i].ChangeAnim(ANIMSTATE::LOOP, 0.1f);
-	}
 
-	console.LoadFile(L"console/tconsole.png");
-	console.SetScale().x = console.imageSize.x * IMGSCALE;
-	console.SetScale().y = console.imageSize.y * IMGSCALE;
-	//console.SetPivot() = OFFSET_B;
-	//console.SetWorldPos(Vector2(0, -app.GetHalfHeight()));
-	mapImage.LoadFile(L"maps/map.bmp");
-	mapImage.SetScale().x = mapImage.imageSize.x * IMGSCALE;
-	mapImage.SetScale().y = mapImage.imageSize.y * IMGSCALE;
+	Utility2::InitImage(console, L"console/tconsole.png");
+	Utility2::InitImage(mapImage, L"maps/map.bmp");
 	mapImage.SetPivot() = OFFSET_LB;
 
 	SelectArea.SetScale().x = 100.0f;
@@ -99,27 +76,7 @@ void Main::Init()
 	TestBox.SetScale().y = 100.0f;
 
 	SSYSTEM->TileMap = &map;
-
-	IMOVE.LoadFile(L"icons/cmdiconsMove.png");
-	IMOVE.SetScale().x = IMOVE.imageSize.x * IMGSCALE;
-	IMOVE.SetScale().y = IMOVE.imageSize.y * IMGSCALE;
-	IMOVE.SetWorldPos(Vector2(-app.GetHalfWidth() + 1048, app.GetHalfHeight() - 750));
-	ISTOP.LoadFile(L"icons/cmdiconsStop.png");
-	ISTOP.SetScale().x = ISTOP.imageSize.x * IMGSCALE;
-	ISTOP.SetScale().y = ISTOP.imageSize.y * IMGSCALE;
-	ISTOP.SetWorldPos(Vector2(-app.GetHalfWidth() + 1140, app.GetHalfHeight() - 750));
-	IATTACK.LoadFile(L"icons/cmdiconsAttack.png");
-	IATTACK.SetScale().x = IATTACK.imageSize.x * IMGSCALE;
-	IATTACK.SetScale().y = IATTACK.imageSize.y * IMGSCALE;
-	IATTACK.SetWorldPos(Vector2(-app.GetHalfWidth() + 1232, app.GetHalfHeight() - 750));
-	IPATROL.LoadFile(L"icons/cmdiconsPatrol.png");
-	IPATROL.SetScale().x = IPATROL.imageSize.x * IMGSCALE;
-	IPATROL.SetScale().y = IPATROL.imageSize.y * IMGSCALE;
-	IPATROL.SetWorldPos(Vector2(-app.GetHalfWidth() + 1048, app.GetHalfHeight() - 830));
-	IHOLD.LoadFile(L"icons/cmdiconsHold.png");
-	IHOLD.SetScale().x = IHOLD.imageSize.x * IMGSCALE;
-	IHOLD.SetScale().y = IHOLD.imageSize.y * IMGSCALE;
-	IHOLD.SetWorldPos(Vector2(-app.GetHalfWidth() + 1140, app.GetHalfHeight() - 830));
+	SSYSTEM->UICam = &cam2;
 }
 
 void Main::Release()
@@ -133,6 +90,8 @@ void Main::Update()
 		ShowCursor(showCursor = !showCursor);
 	if (INPUT->KeyDown(VK_F3))
 		showTileMap = !showTileMap;
+	if (INPUT->KeyDown(VK_F4))
+		app.maincam->SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
 	if (INPUT->KeyDown(VK_F5))
 	{
 		Unit* temp = new Unit();
@@ -256,6 +215,7 @@ void Main::LateUpdate()
 				SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
 			}
 		}
+		SSYSTEM->UpdateCmdIcons();
 	}
 
 
@@ -264,10 +224,6 @@ void Main::LateUpdate()
 		for (size_t i = 0; i < SSYSTEM->UnitPoolSelect.size(); i++)
 		{
 			SSYSTEM->UnitPoolSelect[i]->Move(INPUT->GetWorldMousePos());
-			//if (map.PathFinding(SSYSTEM->UnitPoolSelect[i]->col.GetWorldPos(), INPUT->GetWorldMousePos(), way))
-			//{
-			//	SSYSTEM->UnitPoolSelect[i]->InitPath(way);
-			//}
 		}
 	}
 	for (int i = 0; i < way.size(); i++)
@@ -296,6 +252,7 @@ void Main::LateUpdate()
 				ImGui::Text("%d %d\n", j, i);
 		}
 	}
+	SSYSTEM->Update();
 }
 void Main::Render()
 {
@@ -312,11 +269,7 @@ void Main::Render()
 	TestBox.Render();
 
 	console.Render(&cam2);
-	IMOVE.Render(&cam2);
-	IATTACK.Render(&cam2);
-	ISTOP.Render(&cam2);
-	IHOLD.Render(&cam2);
-	IPATROL.Render(&cam2);
+	SSYSTEM->Render();
 	if (INPUT->KeyPress(VK_LBUTTON))
 	{
 		cursorDrag.SetWorldPos(INPUT->GetWorldMousePos());

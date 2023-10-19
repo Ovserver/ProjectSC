@@ -422,13 +422,13 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 	{
 		bool flag = false;
 		int count = 1;
-		int i = count, j = count;
+		int i = 0, j = 0;
 		while (!flag)
 		{
 			if (count > 100) return false;
 			bool reverse = count % 2 == 0 ? true : false;
 			int icount = 0;
-			while (!flag && icount <= count)
+			while (!flag && icount < count)
 			{
 				if (!(Tiles[dest.x + i][dest.y + j].state == TILE_WALL ||
 					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::UNIT))
@@ -437,10 +437,9 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 				}
 				if (reverse) --i; else ++i;
 				++icount;
-				cout << icount << "icount ";
 			}
 			int jcount = 0;
-			while (!flag && jcount <= count)
+			while (!flag && jcount < count)
 			{
 				if (!(Tiles[dest.x + i][dest.y + j].state == TILE_WALL ||
 					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::UNIT))
@@ -449,7 +448,6 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 				}
 				if (reverse) --j; else ++j;
 				++jcount;
-				cout << jcount << "jcount ";
 			}
 			++count;
 			cout << count;

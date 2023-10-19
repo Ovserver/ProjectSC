@@ -27,11 +27,6 @@ private:
 	ObImage cursorMoveScreen[8];
 	ObImage	console;
 
-	ObImage	IMOVE;
-	ObImage	IATTACK;
-	ObImage	ISTOP;
-	ObImage	IHOLD;
-	ObImage	IPATROL;
 
 	Camera	cam2;
 	ObRect  SelectArea;

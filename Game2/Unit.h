@@ -47,6 +47,6 @@ protected:
 	ObImage			spriteAttack;
 private:
 	float			tickPathUpdateTime = 0;
-	const float		PathUpdateTime = 0.25f;
+	const float		PathUpdateTime = 5.0f;
 };
 

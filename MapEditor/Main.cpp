@@ -38,7 +38,7 @@ void Main::Init()
 	tileMap.SetTile(Int2(1, 0), Int2(6, 3));
 	tileMap.UpdateBuffer();*/
 
-	mapImage.LoadFile(L"map.bmp");
+	mapImage.LoadFile(L"maps/map.bmp");
 	mapImage.SetScale().x = mapImage.imageSize.x * IMGSCALE;
 	mapImage.SetScale().y = mapImage.imageSize.y * IMGSCALE;
 	mapImage.SetPivot() = OFFSET_LB;

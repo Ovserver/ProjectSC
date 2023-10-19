@@ -8,13 +8,13 @@ Unit::Unit()
 	//col.SetPivot() = OFFSET_B;
 	col.isFilled = false;
 
-	Utility2::InitImage(spriteIdle, L"player_walk.png", 6, 8);
+	Utility2::InitImage(spriteIdle, L"player_walk.png",OFFSET_B, 6, 8);
 	spriteMove.SetParentRT(col);
 
-	Utility2::InitImage(spriteMove, L"player_walk.png", 6, 8);
+	Utility2::InitImage(spriteMove, L"player_walk.png", OFFSET_B, 6, 8);
 	spriteMove.SetParentRT(col);
 
-	Utility2::InitImage(spriteAttack, L"player_roll.png", 6, 8);
+	Utility2::InitImage(spriteAttack, L"player_roll.png", OFFSET_B, 6, 8);
 	spriteAttack.SetParentRT(col);
 
 	dirFrameY[LB] = 5;
@@ -49,6 +49,7 @@ void Unit::Update()
 			else
 			{
 				pathWay.clear();
+				cout << "pathClear\n";
 			}
 		}
 	}
@@ -101,7 +102,6 @@ void Unit::Render()
 void Unit::InitPath(vector<Tile*> way)
 {
 	pathWay = way;
-	pathfinding = true;
 	pathWay.pop_back();
 
 	unitState = UnitState::MOVE;
@@ -110,6 +110,7 @@ void Unit::InitPath(vector<Tile*> way)
 
 void Unit::Move(Vector2 CommandPos)
 {
+	pathfinding = true;
 	unitState = UnitState::MOVE;
 	cmdPos = CommandPos;
 	tickPathUpdateTime = PathUpdateTime;
