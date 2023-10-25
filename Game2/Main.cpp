@@ -15,7 +15,7 @@ Main::~Main()
 }
 void Main::Init()
 {
-	map.file = "python.txt";
+	//map.file = "python.txt";
 	map.Load();
 	map.CreateTileCost();
 	mainPlayer.SetWorldPos(Vector2(500, 500));
@@ -26,14 +26,14 @@ void Main::Init()
 	Utility2::InitImage(cursorDrag, L"cursor/Drag.png");
 
 	int n = 0;
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullB.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLB.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullL.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLT.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullT.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRT.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullR_offset.png");
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRB.png");
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullB.png",Vector2(),2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLB.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullL.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLT.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullT.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRT.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullR_offset.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRB.png", Vector2(), 2);
 	n = 0;
 	cursorMoveScreen[n++].SetPivot() = OFFSET_B;
 	cursorMoveScreen[n++].SetPivot() = OFFSET_LB;
@@ -121,109 +121,102 @@ void Main::Update()
 	{
 		app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
 	}
+	SSYSTEM->Update();
 }
 float intervalTime = 0;
 bool MoveLeftScreen = false, MoveRightScreen = false, MoveUpScreen = false, MoveDownScreen = false;
 void Main::LateUpdate()
 {
-	if (INPUT->KeyDown(VK_LBUTTON))
+	if (INPUT->GetScreenMousePos().y < 690)
 	{
-		startDragPos = INPUT->GetScreenMousePos();
-		SelectArea.SetWorldPos(Vector2(-app.GetHalfWidth() + startDragPos.x,
-			app.GetHalfHeight() - startDragPos.y));
-		SelectAreaCol.SetWorldPos(app.maincam->GetWorldPos() + SelectArea.GetWorldPos());
-	}
-	if (INPUT->KeyPress(VK_LBUTTON))
-	{
-		SelectArea.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
-		SelectArea.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
+		if (INPUT->KeyDown(VK_LBUTTON))
+		{
+			startDragPos = INPUT->GetScreenMousePos();
+			SelectArea.SetWorldPos(Vector2(-app.GetHalfWidth() + startDragPos.x,
+				app.GetHalfHeight() - startDragPos.y));
+			SelectAreaCol.SetWorldPos(app.maincam->GetWorldPos() + SelectArea.GetWorldPos());
+		}
+		if (INPUT->KeyPress(VK_LBUTTON))
+		{
+			SelectArea.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
+			SelectArea.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
 
-		SelectAreaCol.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
-		SelectAreaCol.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
+			SelectAreaCol.SetScale().x = -startDragPos.x + INPUT->GetScreenMousePos().x;
+			SelectAreaCol.SetScale().y = startDragPos.y - INPUT->GetScreenMousePos().y;
 
-		if (SelectAreaCol.Intersect(&TestBox))
-		{
-			cout << "ccooooooollll" << endl;
-		}
-		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
-		{
-			if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
+			for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 			{
-				cout << "ccooooooollll" << endl;
-				SSYSTEM->UnitPool[i]->col.color = Color(0, 1, 0);
-			}
-			else
-			{
-				SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
-			}
-		}
-	}
-	else
-	{
-		if (INPUT->GetScreenMousePos().y < 10)
-		{
-			MoveUpScreen = true;
-			app.maincam->MoveWorldPos(UP * 1200 * DELTA);
-		}
-		else
-		{
-			MoveUpScreen = false;
-		}
-		if (INPUT->GetScreenMousePos().y > app.GetHeight() - 10)
-		{
-			MoveDownScreen = true;
-			app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
-		}
-		else
-		{
-			MoveDownScreen = false;
-		}
-		if (INPUT->GetScreenMousePos().x < 10)
-		{
-			MoveLeftScreen = true;
-			app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);
-		}
-		else
-		{
-			MoveLeftScreen = false;
-		}
-		if (INPUT->GetScreenMousePos().x > app.GetWidth() - 10)
-		{
-			MoveRightScreen = true;
-			app.maincam->MoveWorldPos(RIGHT * 1200 * DELTA);
-		}
-		else
-		{
-			MoveRightScreen = false;
-		}
-	}
-	if (INPUT->KeyUp(VK_LBUTTON))
-	{
-		startDragPos = Vector2(0, 0);
-		SSYSTEM->UnitPoolSelect.clear();
-		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
-		{
-			if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
-			{
-				if (SSYSTEM->UnitPoolSelect.size() < 12)
-					SSYSTEM->UnitPoolSelect.push_back(SSYSTEM->UnitPool[i]);
+				if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
+				{
+					//SSYSTEM->UnitPool[i]->col.color = Color(0, 1, 0);
+				}
 				else
-					SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
+				{
+					//SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
+				}
+			}
+		}
+		else
+		{
+			if (INPUT->GetScreenMousePos().y < 10)
+			{
+				MoveUpScreen = true;
+				app.maincam->MoveWorldPos(UP * 1200 * DELTA);
 			}
 			else
 			{
-				SSYSTEM->UnitPool[i]->col.color = Color(1, 1, 1);
+				MoveUpScreen = false;
 			}
+			if (INPUT->GetScreenMousePos().y > app.GetHeight() - 10)
+			{
+				MoveDownScreen = true;
+				app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
+			}
+			else
+			{
+				MoveDownScreen = false;
+			}
+			if (INPUT->GetScreenMousePos().x < 10)
+			{
+				MoveLeftScreen = true;
+				app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);
+			}
+			else
+			{
+				MoveLeftScreen = false;
+			}
+			if (INPUT->GetScreenMousePos().x > app.GetWidth() - 10)
+			{
+				MoveRightScreen = true;
+				app.maincam->MoveWorldPos(RIGHT * 1200 * DELTA);
+			}
+			else
+			{
+				MoveRightScreen = false;
+			}
+		}		
+		if (INPUT->KeyUp(VK_LBUTTON) && abs(SelectAreaCol.GetScale().x) > 2 && abs(SelectAreaCol.GetScale().y) > 2)
+		{			
+			SSYSTEM->UnitPoolSelect.clear();
+			for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
+			{
+				if (SelectAreaCol.Intersect(&SSYSTEM->UnitPool[i]->col))
+				{
+					if (SSYSTEM->UnitPoolSelect.size() < 12)
+						SSYSTEM->UnitPoolSelect.push_back(SSYSTEM->UnitPool[i]);
+				}
+			}
+			SSYSTEM->UpdateCmdIcons();
+			startDragPos = Vector2(0, 0);
 		}
-		SSYSTEM->UpdateCmdIcons();
-	}
 
 
-	if (INPUT->KeyDown(VK_RBUTTON))
-	{
-		for (size_t i = 0; i < SSYSTEM->UnitPoolSelect.size(); i++)
+		if (INPUT->KeyDown(VK_RBUTTON))
 		{
-			SSYSTEM->UnitPoolSelect[i]->Move(INPUT->GetWorldMousePos());
+			for (size_t i = 0; i < SSYSTEM->UnitPoolSelect.size(); i++)
+			{
+				SSYSTEM->UnitPoolSelect[i]->Move(INPUT->GetWorldMousePos());
+			}
 		}
 	}
 	for (int i = 0; i < way.size(); i++)
@@ -252,22 +245,13 @@ void Main::LateUpdate()
 				ImGui::Text("%d %d\n", j, i);
 		}
 	}
-	SSYSTEM->Update();
+	
 }
 void Main::Render()
 {
 	mapImage.Render();
 	if (showTileMap)
-		map.Render();
-	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
-	{
-		SSYSTEM->UnitPool[i]->Render();
-	}
-	mainPlayer.Render();
-	boss.Render();
-
-	TestBox.Render();
-
+		map.Render();	
 	console.Render(&cam2);
 	SSYSTEM->Render();
 	if (INPUT->KeyPress(VK_LBUTTON))

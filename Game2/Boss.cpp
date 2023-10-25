@@ -21,14 +21,6 @@ Boss::Boss()
 
 	state = BossState::IDLE;
 
-	dirFrameY[LB] = 6;
-	dirFrameY[B] = 5;
-	dirFrameY[RB] = 2;
-	dirFrameY[R] = 0;
-	dirFrameY[RT] = 7;
-	dirFrameY[T] = 4;
-	dirFrameY[LT] = 3;
-	dirFrameY[L] = 1;
 
 	speed = 100.0f;
 }

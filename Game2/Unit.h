@@ -1,5 +1,4 @@
 #pragma once
-
 enum class UnitType
 {
 	UNUSED, UNIT, NEUTRAL, RESOURCE, EFFECT
@@ -32,10 +31,11 @@ public:
 	ObRect			col;
 	vector<Tile*>	pathWay;
 	Vector2			cmdPos;
+	CmdIconPool		IconPool;
 protected:
-	int				dirFrameY[8];
+	int				dirFrameX[9];
 	float			moveSpeed;
-
+	bool			flipImage;
 	Vector2         keyDir;
 	Vector2			moveDir;
 
@@ -49,4 +49,3 @@ private:
 	float			tickPathUpdateTime = 0;
 	const float		PathUpdateTime = 5.0f;
 };
-

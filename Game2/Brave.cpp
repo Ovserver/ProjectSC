@@ -41,14 +41,6 @@ Brave::Brave()
 		trail[i].isVisible = false;
 	}
 
-	dirFrameY[LB] = 5;
-	dirFrameY[B] = 3;
-	dirFrameY[RB] = 4;
-	dirFrameY[R] = 0;
-	dirFrameY[RT] = 7;
-	dirFrameY[T] = 1;
-	dirFrameY[LT] = 6;
-	dirFrameY[L] = 2;
 
 	speed = 200.0f;
 	trailTime = 0.0f;
@@ -261,9 +253,7 @@ int Character::lookDir(Vector2 dir)
 	{
 		if (-157.5f + 45.0f * i < seta and seta <= -157.5f + 45.0f * (i + 1))
 		{
-			return dirFrameY[i];
+			return dirFrameX[i];
 		}
 	}
-
-	return dirFrameY[L];
 }

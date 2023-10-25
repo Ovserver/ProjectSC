@@ -13,7 +13,7 @@ class Character
 {
 protected:
 	ObRect			col;
-	int				dirFrameY[8];
+	int				dirFrameX[8];
 public:
 	int  lookDir(Vector2 dir);
 };

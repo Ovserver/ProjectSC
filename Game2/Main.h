@@ -27,7 +27,6 @@ private:
 	ObImage cursorMoveScreen[8];
 	ObImage	console;
 
-
 	Camera	cam2;
 	ObRect  SelectArea;
 	ObRect	SelectAreaCol;
