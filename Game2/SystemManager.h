@@ -19,6 +19,16 @@ class Unit;
 class SystemManager : public Singleton<SystemManager>
 {
 public:
+	SystemManager();
+	void Update();
+	void Render();
+	void UpdateTileCol();
+	void UpdateCmdIcons();
+	void CmdPosSelectMod();
+	void CmdExecute();
+	void CmdExecute(CmdIconList command);
+	void DeleteUnitPool();
+public:
 	bool	SelectMode;
 	Camera* UICam;
 	ObImage	IMOVE;
@@ -36,17 +46,10 @@ public:
 	ObTileMap*		TileMap;
 	vector<Unit*>	UnitPool;
 	vector<Unit*>	UnitPoolSelect;
+	vector<Unit*>	UnitPoolDelete;
 
 	CmdIconPool*	IconPoolTemp;
 	CmdIconPool*	IconPoolTempSelect;
 	CmdIconPool		IconPoolSelect;
-public:
-	SystemManager();
-	void Update();
-	void Render();
-	void UpdateTileCol();
-	void UpdateCmdIcons();
-	void CmdPosSelectMod();
-	void CmdExecute();
-	void CmdExecute(CmdIconList command);
+
 };

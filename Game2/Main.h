@@ -24,6 +24,7 @@ private:
 	vector<Tile*> way;
 	ObImage	cursor;
 	ObImage cursorDrag;
+	//아래부터 시작 시계방향
 	ObImage cursorMoveScreen[8];
 	ObImage	console;
 

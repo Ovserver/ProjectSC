@@ -7,7 +7,7 @@ ObTileMap::ObTileMap()
 	tileSize.y = 4 * 128;
 
 	//타일 한칸의 크기
-	scale = Vector2(32.0f, 32.0f) * IMGSCALE / 4.0f;
+	scale = Vector2(TILESCALE, TILESCALE) * IMGSCALE / 4.0f;
 	tileImages[0] = new ObImage();
 	tileImages[0]->LoadFile(L"Tile.png");
 	tileImages[0]->maxFrame = Int2(8, 6);

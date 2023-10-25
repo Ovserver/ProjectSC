@@ -52,6 +52,8 @@ using namespace SimpleMath;
 #pragma comment(lib, "../Libs/Fmod/fmodL_vc.lib")
 
 #define IMGSCALE 2.0f
+#define TILESCALE 32.0f
+#define FRAME(frame) (1.0f / frame)
 //Macro(Pascal)
 #define Check(hr)			{ assert(SUCCEEDED(hr)); }
 #define SafeRelease(p)		{ if(p){ (p)->Release(); (p) = nullptr; } }

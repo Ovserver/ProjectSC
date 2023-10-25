@@ -5,8 +5,16 @@
 
 Unit::Unit()
 {
-	//col.SetPivot() = OFFSET_B;
+	maxHp = 100;
+	hp = maxHp;
+	atkDamage = 20;
+
+	playerNum = 0;
 	col.isFilled = false;
+	targetCmdUnit = nullptr;
+
+	attackRange = 3;
+	sightRange = 6;
 
 	Utility2::InitImage(spriteIdle, L"unit/zealotMove.png", Vector2(), 9, 8);
 	spriteIdle.SetParentRT(col);
@@ -14,8 +22,15 @@ Unit::Unit()
 	Utility2::InitImage(spriteMove, L"unit/zealotMove.png", Vector2(), 9, 8);
 	spriteMove.SetParentRT(col);
 
-	Utility2::InitImage(spriteAttack, L"player_roll.png", Vector2(), 6, 8);
+	Utility2::InitImage(spriteAttack, L"unit/zealotAttack.png", Vector2(), 9, 5);
 	spriteAttack.SetParentRT(col);
+
+	Utility2::InitImage(spriteDeath, L"unit/zealotDeath.png", Vector2(), 7);
+	//spriteDeath.isVisible = false;
+	spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
+	spriteDeath.SetParentRT(col);
+
+	deathTime = 7 * FRAME(18);
 
 	dirFrameX[A0000] = 0;
 	dirFrameX[A0225] = 1;
@@ -32,6 +47,7 @@ Unit::Unit()
 	col.SetScale() = spriteMove.GetScale();
 	moveSpeed = 200;
 
+	tickAttackCooldown = attackCooldown;
 	tickPathUpdateTime = PathUpdateTime;
 
 	int i = 0;
@@ -44,19 +60,38 @@ Unit::Unit()
 	IconPool.iconList[i++] = CmdIconList::NONE;
 	IconPool.iconList[i++] = CmdIconList::NONE;
 	IconPool.iconList[i] = CmdIconList::NONE;
+
+	unitCmd = UnitCmd::STOP;
 }
 
 void Unit::Update()
 {
-	if (INPUT->KeyPress('N'))
-		spriteMove.SetRotation().y += DELTA * 2;
+	if (hp <= 0 && deathTime >= 0)
+		deathTime -= DELTA;
+	if (deathTime < 0)
+	{
+		deathTime = 100;
+		SSYSTEM->UnitPoolDelete.push_back(this);
+		return;
+	}
 	if (unitState == UnitState::MOVE)
 	{
 		if (TIMER->GetTick(tickPathUpdateTime, PathUpdateTime))
 		{
 			vector<Tile*> temp;
+			Vector2	commandPostemp;
+
+			if (unitCmd == UnitCmd::ATTACK)
+			{
+				if (targetCmdUnit)
+					commandPostemp = targetCmdUnit->GetWorldPos();
+				else
+					commandPostemp = cmdPos;
+			}
+			else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
+
 			SSYSTEM->UpdateTileCol();
-			if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), cmdPos, pathWay))
+			if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), commandPostemp, pathWay))
 			{
 				InitPath(pathWay);
 			}
@@ -69,53 +104,149 @@ void Unit::Update()
 	}
 	if (pathfinding)
 	{
-		if (pathWay.empty())
+		if (unitState == UnitState::MOVE)
+		{
+			if (pathWay.empty())
+			{
+				Stop();
+				return;
+			}
+			moveDir = pathWay.back()->Pos - col.GetWorldPos();
+			if (moveDir.Length() > moveSpeed * DELTA)
+			{
+				moveDir.Normalize();
+				col.MoveWorldPos(moveDir * moveSpeed * DELTA);
+				lookDir(moveDir);
+			}
+			else
+			{
+				col.SetWorldPos(pathWay.back()->Pos);
+				pathWay.pop_back();
+			}
+		}
+		else if (unitState == UnitState::IDLE)
 		{
 			Stop();
-			return;
 		}
-		moveDir = pathWay.back()->Pos - col.GetWorldPos();
-		if (moveDir.Length() > moveSpeed * DELTA)
+	}
+	if (unitCmd == UnitCmd::STOP || unitCmd == UnitCmd::ATTACK || unitCmd == UnitCmd::PATROL || unitCmd == UnitCmd::HOLD)
+	{
+		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
-			moveDir.Normalize();
-			col.MoveWorldPos(moveDir * moveSpeed * DELTA);
-			lookDir(moveDir);
+			Vector2 temp = SSYSTEM->UnitPool[i]->GetWorldPos() - GetWorldPos();
+			if (playerNum != SSYSTEM->UnitPool[i]->playerNum && temp.Length() < sightRange * TILESCALE)
+			{
+				targetCmdUnit = SSYSTEM->UnitPool[i];
+				if (unitCmd == UnitCmd::STOP)
+				{
+					pathfinding = true;
+					unitCmd = UnitCmd::ATTACK;
+				}
+				unitState = UnitState::MOVE;
+				originPos = GetWorldPos();
+				break;
+			}
+		}
+	}
+	if (unitCmd == UnitCmd::ATTACK)
+	{
+		if (targetCmdUnit)
+		{
+			if (targetCmdUnit->hp > 0)
+			{
+				Vector2 temp = targetCmdUnit->GetWorldPos() - GetWorldPos();
+				if (temp.Length() < attackRange * TILESCALE)
+				{
+					unitState = UnitState::ATTACK;
+				}
+				else if (temp.Length() < sightRange * TILESCALE)
+				{
+					unitState = UnitState::MOVE;
+				}
+			}
+			else
+			{
+				targetCmdUnit = nullptr;
+				if (cmdPos != Vector2())
+					unitState = UnitState::MOVE;
+				else
+					unitState = UnitState::IDLE;
+			}
+		}
+	}
+	if (unitCmd == UnitCmd::HOLD)
+	{
+		if (targetCmdUnit)
+		{
+			if (targetCmdUnit->hp > 0)
+			{
+				Vector2 temp = targetCmdUnit->GetWorldPos() - GetWorldPos();
+				if (temp.Length() < attackRange * TILESCALE)
+				{
+					unitState = UnitState::ATTACK;
+				}
+				else
+				{
+					unitState = UnitState::IDLE;
+				}
+			}
+			else
+			{
+				targetCmdUnit = nullptr;
+			}
+		}
+	}
+	if (unitState == UnitState::ATTACK)
+	{
+		if (targetCmdUnit && targetCmdUnit->hp > 0 && TIMER->GetTick(tickAttackCooldown, attackCooldown))
+		{
+			targetCmdUnit->Damage(atkDamage);
+			spriteAttack.ChangeAnim(ANIMSTATE::ONCE, FRAME(18), false);
+			ImGui::Text("attack State");
 		}
 		else
 		{
-			col.SetWorldPos(pathWay.back()->Pos);
-			pathWay.pop_back();
+			if (unitCmd == UnitCmd::ATTACK)
+				unitState == UnitState::MOVE;
+			else
+				unitState == UnitState::IDLE;
 		}
-	}	
+	}
 	spriteMove.frame.x = lookDir(moveDir);
 	spriteIdle.frame.x = lookDir(moveDir);
+	spriteAttack.frame.x = lookDir(moveDir);
 }
 
 void Unit::Render()
 {
-	ImGui::Text("rotation : %f", spriteMove.GetRotation().y);	
-	if (flipImage)
+	if (hp > 0)
 	{
-	ImGui::Text("rotation : true");	
-		spriteIdle.SetRotation().y = 180 * ToRadian;
-		spriteMove.SetRotation().y = 180 * ToRadian;
-		spriteAttack.SetRotation().y = 180 * ToRadian;
+		if (flipImage)
+		{
+			spriteIdle.SetRotation().y = 180 * ToRadian;
+			spriteMove.SetRotation().y = 180 * ToRadian;
+			spriteAttack.SetRotation().y = 180 * ToRadian;
 
+		}
+		else
+		{
+			spriteIdle.SetRotation().y = 0;
+			spriteMove.SetRotation().y = 0;
+			spriteAttack.SetRotation().y = 0;
+		}
+		if (unitState == UnitState::IDLE)
+			spriteIdle.Render();
+		if (unitState == UnitState::MOVE)
+			spriteMove.Render();
+		if (unitState == UnitState::ATTACK)
+			spriteAttack.Render();
+		if (Utility2::ShowCollider)
+			col.Render();
 	}
-	else {
-	ImGui::Text("rotation : false");	
-		spriteIdle.SetRotation().y = 0;
-		spriteMove.SetRotation().y = 0;
-		spriteAttack.SetRotation().y = 0;
+	else
+	{
+		spriteDeath.Render();
 	}
-	if (unitState == UnitState::IDLE)
-		spriteIdle.Render();
-	if (unitState == UnitState::MOVE)
-		spriteMove.Render();
-	if (unitState == UnitState::ATTACK)
-		spriteAttack.Render();
-	if (Utility2::ShowCollider)
-		col.Render();
 }
 
 void Unit::InitPath(vector<Tile*> way)
@@ -124,30 +255,61 @@ void Unit::InitPath(vector<Tile*> way)
 	pathWay.pop_back();
 
 	unitState = UnitState::MOVE;
-	spriteMove.ChangeAnim(ANIMSTATE::LOOP, 1.0f / 18, false);
+	spriteMove.ChangeAnim(ANIMSTATE::LOOP, FRAME(18), false);
+}
+
+void Unit::Death()
+{
+	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
+	{
+		spriteDeath.isVisible = true;
+		cout << "death" << endl;
+		return;
+	}
 }
 
 void Unit::Move(Vector2 CommandPos)
 {
 	pathfinding = true;
+	unitCmd = UnitCmd::MOVE;
 	unitState = UnitState::MOVE;
 	cmdPos = CommandPos;
 	tickPathUpdateTime = PathUpdateTime;
 	cout << "Command Move " << endl;
 }
 
-void Unit::Attack()
+void Unit::Attack(Vector2 CommandPos)
 {
+	pathfinding = true;
+	unitCmd = UnitCmd::ATTACK;
+	unitState = UnitState::MOVE;
+	cmdPos = CommandPos;
+	tickPathUpdateTime = PathUpdateTime;
+	cout << "Command Attack " << endl;
+}
+
+void Unit::Hold()
+{
+	pathWay.clear();
+	pathfinding = false;
+	unitCmd = UnitCmd::HOLD;
+	unitState = UnitState::IDLE;
+	spriteMove.ChangeAnim(ANIMSTATE::STOP, 0.1f, false);
+	spriteMove.frame.y = 0;
+	tickPathUpdateTime = PathUpdateTime;
+	cout << "Command Hold " << endl;
 }
 
 void Unit::Stop()
 {
 	pathWay.clear();
 	pathfinding = false;
+	unitCmd = UnitCmd::STOP;
 	unitState = UnitState::IDLE;
 	spriteMove.ChangeAnim(ANIMSTATE::STOP, 0.1f, false);
 	spriteMove.frame.y = 0;
 	tickPathUpdateTime = PathUpdateTime;
+	cout << "Command Stop " << endl;
 }
 
 int Unit::lookDir(Vector2 dir)
@@ -157,7 +319,6 @@ int Unit::lookDir(Vector2 dir)
 	seta -= 90.0f;
 	if (seta < 0)
 		seta += 360.0f;
-	cout << seta << endl;
 	for (int i = 0; i < 8; i++)
 	{
 		if (360 - 20.0f * i > seta and seta >= 360 - 20.0f * (i + 1))

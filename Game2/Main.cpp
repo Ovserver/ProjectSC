@@ -45,7 +45,7 @@ void Main::Init()
 	cursorMoveScreen[n].SetPivot() = OFFSET_RB;
 
 	for (size_t i = 0; i < 8; i++)
-		cursorMoveScreen[i].ChangeAnim(ANIMSTATE::LOOP, 0.1f);
+		cursorMoveScreen[i].ChangeAnim(ANIMSTATE::LOOP, FRAME(10));
 
 	Utility2::InitImage(console, L"console/tconsole.png");
 	Utility2::InitImage(mapImage, L"maps/map.bmp");
@@ -63,7 +63,7 @@ void Main::Init()
 	app.maincam->viewport.y = 0;
 	app.maincam->viewport.width = app.GetWidth();
 	app.maincam->viewport.height = app.GetHeight();
-	app.maincam->SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
+	app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
 
 	cam2.viewport.x = 0;
 	cam2.viewport.y = 0;
@@ -71,7 +71,7 @@ void Main::Init()
 	cam2.viewport.height = app.GetHeight();
 	cam2.UpdateMatrix();
 
-	TestBox.SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
+	TestBox.SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
 	TestBox.SetScale().x = 100.0f;
 	TestBox.SetScale().y = 100.0f;
 
@@ -82,6 +82,7 @@ void Main::Init()
 void Main::Release()
 {
 }
+UINT	pNumber = 0;
 void Main::Update()
 {
 	if (INPUT->KeyDown(VK_F1))
@@ -91,19 +92,14 @@ void Main::Update()
 	if (INPUT->KeyDown(VK_F3))
 		showTileMap = !showTileMap;
 	if (INPUT->KeyDown(VK_F4))
-		app.maincam->SetWorldPos(Vector2(32 * 64, 32 * 64) * IMGSCALE);
+		app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
 	if (INPUT->KeyDown(VK_F5))
 	{
 		Unit* temp = new Unit();
 		temp->SetWorldPos(INPUT->GetWorldMousePos());
+		temp->playerNum = pNumber++;
 		SSYSTEM->UnitPool.push_back(temp);
 	}
-	mainPlayer.Update();
-	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
-	{
-		SSYSTEM->UnitPool[i]->Update();
-	}
-	boss.Update(mainPlayer.GetWorldPos());
 
 	if (INPUT->KeyPress(VK_LEFT))
 	{
@@ -235,7 +231,8 @@ void Main::LateUpdate()
 	ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
 	ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
 	ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
-	ImGui::Text("Unit Pool Selected\n%d", SSYSTEM->UnitPoolSelect.size());
+	ImGui::Text("Unit Pool : %d", SSYSTEM->UnitPool.size());
+	ImGui::Text("Unit Pool Selected : %d", SSYSTEM->UnitPoolSelect.size());
 	ImGui::Text("TileCol Unit\n");
 	for (size_t i = 0; i < SSYSTEM->TileMap->tileSize.y; i++)
 	{

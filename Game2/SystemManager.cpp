@@ -37,11 +37,14 @@ SystemManager::SystemManager()
 	}
 	SelectMode = false;
 	Utility2::InitImage(TestBox, L"Tile2.png");
-	TestBox.SetWorldPos(cmdIconsPos[0]);
 }
 
 void SystemManager::Update()
 {
+	for (size_t i = 0; i < UnitPool.size(); i++)
+	{
+		UnitPool[i]->Update();
+	}
 	Vector2 temp = INPUT->GetScreenMousePos();
 	temp.x -= app.GetHalfWidth(); temp.y -= app.GetHalfHeight(); temp.y *= -1;
 	if (!SelectMode)
@@ -54,6 +57,8 @@ void SystemManager::Update()
 				{
 					if (IconPoolTemp->iconList[i] == CmdIconList::STOP)
 						CmdExecute(CmdIconList::STOP);
+					else if(IconPoolTemp->iconList[i] == CmdIconList::HOLD)
+						CmdExecute(CmdIconList::HOLD);
 					else
 					{
 						cmdIconsNum = i;
@@ -71,6 +76,11 @@ void SystemManager::Update()
 			CmdExecute();
 		}
 	}
+	if (!UnitPoolDelete.empty())
+	{
+		DeleteUnitPool();
+	}
+
 }
 
 void SystemManager::Render()
@@ -117,7 +127,7 @@ void SystemManager::UpdateCmdIcons()
 	}
 	if (!UnitPoolSelect.empty())
 	{
-		IconPoolTemp = &UnitPool[0]->IconPool;
+		IconPoolTemp = &UnitPoolSelect.front()->IconPool;
 		for (size_t i = 0; i < NUM_CMDICON; i++)
 		{
 			switch (IconPoolTemp->iconList[i])
@@ -204,11 +214,12 @@ void SystemManager::CmdExecute()
 			UnitPoolSelect[i]->Stop();
 			break;
 		case CmdIconList::ATTACK:
-			UnitPoolSelect[i]->Attack();
+			UnitPoolSelect[i]->Attack(cmdPos);
 			break;
 		case CmdIconList::PATROL:
 			break;
 		case CmdIconList::HOLD:
+			UnitPoolSelect[i]->Hold();
 			break;
 		case CmdIconList::GATHER:
 			break;
@@ -271,11 +282,12 @@ void SystemManager::CmdExecute(CmdIconList command)
 			UnitPoolSelect[i]->Stop();
 			break;
 		case CmdIconList::ATTACK:
-			UnitPoolSelect[i]->Attack();
+			UnitPoolSelect[i]->Attack(cmdPos);
 			break;
 		case CmdIconList::PATROL:
 			break;
 		case CmdIconList::HOLD:
+			UnitPoolSelect[i]->Hold();
 			break;
 		case CmdIconList::GATHER:
 			break;
@@ -286,5 +298,35 @@ void SystemManager::CmdExecute(CmdIconList command)
 		default:
 			break;
 		}
+	}
+}
+
+void SystemManager::DeleteUnitPool()
+{
+	bool flag = false;
+	for (size_t i = 0; i < UnitPool.size(); i++)
+	{
+		if (UnitPool[i] == UnitPoolDelete.back())
+		{
+			UnitPool.erase(UnitPool.begin() + i);
+			UnitPool.shrink_to_fit();
+			flag = true;
+			break;
+		}
+	}
+	for (size_t i = 0; i < UnitPoolSelect.size(); i++)
+	{
+		if (UnitPool[i] == UnitPoolDelete.back())
+		{
+			UnitPoolSelect.erase(UnitPool.begin() + i);
+			UnitPoolSelect.shrink_to_fit();
+			flag = true;
+			break;
+		}
+	}
+	if (flag)
+	{
+		delete UnitPoolDelete.back();
+		UnitPoolDelete.pop_back();
 	}
 }
