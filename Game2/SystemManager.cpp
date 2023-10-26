@@ -316,9 +316,9 @@ void SystemManager::DeleteUnitPool()
 	}
 	for (size_t i = 0; i < UnitPoolSelect.size(); i++)
 	{
-		if (UnitPool[i] == UnitPoolDelete.back())
+		if (UnitPoolSelect[i] == UnitPoolDelete.back())
 		{
-			UnitPoolSelect.erase(UnitPool.begin() + i);
+			UnitPoolSelect.erase(UnitPoolSelect.begin() + i);
 			UnitPoolSelect.shrink_to_fit();
 			flag = true;
 			break;

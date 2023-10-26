@@ -89,7 +89,7 @@ void Unit::Update()
 					commandPostemp = cmdPos;
 			}
 			else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
-
+			// pathfinding을 특정 이벤트 발생 시 갱신하도록 함수화 하여 수정하기
 			SSYSTEM->UpdateTileCol();
 			if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), commandPostemp, pathWay))
 			{
@@ -129,14 +129,15 @@ void Unit::Update()
 			Stop();
 		}
 	}
-	if (unitCmd == UnitCmd::STOP || unitCmd == UnitCmd::ATTACK || unitCmd == UnitCmd::PATROL || unitCmd == UnitCmd::HOLD)
+	if ((unitCmd == UnitCmd::STOP || unitCmd == UnitCmd::ATTACK || unitCmd == UnitCmd::PATROL || unitCmd == UnitCmd::HOLD))
 	{
 		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
 			Vector2 temp = SSYSTEM->UnitPool[i]->GetWorldPos() - GetWorldPos();
 			if (playerNum != SSYSTEM->UnitPool[i]->playerNum && temp.Length() < sightRange * TILESCALE)
 			{
-				targetCmdUnit = SSYSTEM->UnitPool[i];
+				if(!targetCmdUnit)
+					targetCmdUnit = SSYSTEM->UnitPool[i];
 				if (unitCmd == UnitCmd::STOP)
 				{
 					pathfinding = true;
@@ -215,6 +216,10 @@ void Unit::Update()
 	spriteMove.frame.x = lookDir(moveDir);
 	spriteIdle.frame.x = lookDir(moveDir);
 	spriteAttack.frame.x = lookDir(moveDir);
+
+	ImGui::Text("unitState %d",unitState);
+	ImGui::Text("unitcmd %d",unitCmd);
+	ImGui::Text("targetcmdunit %d",(bool)targetCmdUnit);
 }
 
 void Unit::Render()
@@ -275,6 +280,7 @@ void Unit::Move(Vector2 CommandPos)
 	unitState = UnitState::MOVE;
 	cmdPos = CommandPos;
 	tickPathUpdateTime = PathUpdateTime;
+	targetCmdUnit = nullptr;
 	cout << "Command Move " << endl;
 }
 
@@ -285,6 +291,7 @@ void Unit::Attack(Vector2 CommandPos)
 	unitState = UnitState::MOVE;
 	cmdPos = CommandPos;
 	tickPathUpdateTime = PathUpdateTime;
+	targetCmdUnit = nullptr;
 	cout << "Command Attack " << endl;
 }
 
@@ -297,6 +304,7 @@ void Unit::Hold()
 	spriteMove.ChangeAnim(ANIMSTATE::STOP, 0.1f, false);
 	spriteMove.frame.y = 0;
 	tickPathUpdateTime = PathUpdateTime;
+	targetCmdUnit = nullptr;
 	cout << "Command Hold " << endl;
 }
 
@@ -309,6 +317,7 @@ void Unit::Stop()
 	spriteMove.ChangeAnim(ANIMSTATE::STOP, 0.1f, false);
 	spriteMove.frame.y = 0;
 	tickPathUpdateTime = PathUpdateTime;
+	targetCmdUnit = nullptr;
 	cout << "Command Stop " << endl;
 }
 

@@ -63,6 +63,6 @@ private:
 	float			tickAttackCooldown = 0;
 	const float		attackCooldown = 1.0f;
 	float			tickPathUpdateTime = 0;
-	const float		PathUpdateTime = 5.0f;
+	const float		PathUpdateTime = 0.5f;
 	UnitCmd			unitCmd;
 };
