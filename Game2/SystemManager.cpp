@@ -309,7 +309,7 @@ void SystemManager::DeleteUnitPool()
 		if (UnitPool[i] == UnitPoolDelete.back())
 		{
 			UnitPool.erase(UnitPool.begin() + i);
-			UnitPool.shrink_to_fit();
+			//UnitPool.shrink_to_fit();
 			flag = true;
 			break;
 		}
@@ -319,7 +319,8 @@ void SystemManager::DeleteUnitPool()
 		if (UnitPoolSelect[i] == UnitPoolDelete.back())
 		{
 			UnitPoolSelect.erase(UnitPoolSelect.begin() + i);
-			UnitPoolSelect.shrink_to_fit();
+			//UnitPoolSelect.shrink_to_fit();
+
 			flag = true;
 			break;
 		}
