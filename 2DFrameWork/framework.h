@@ -54,6 +54,8 @@ using namespace SimpleMath;
 #define IMGSCALE 2.0f
 #define TILESCALE 32.0f
 #define FRAME(frame) (1.0f / frame)
+#define INTPAIR std::pair<int,int>
+#define VEC std::vector
 //Macro(Pascal)
 #define Check(hr)			{ assert(SUCCEEDED(hr)); }
 #define SafeRelease(p)		{ if(p){ (p)->Release(); (p) = nullptr; } }

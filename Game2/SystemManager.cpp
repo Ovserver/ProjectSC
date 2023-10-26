@@ -309,17 +309,17 @@ void SystemManager::DeleteUnitPool()
 		if (UnitPool[i] == UnitPoolDelete.back())
 		{
 			UnitPool.erase(UnitPool.begin() + i);
-			UnitPool.shrink_to_fit();
+			//UnitPool.shrink_to_fit();
 			flag = true;
 			break;
 		}
 	}
 	for (size_t i = 0; i < UnitPoolSelect.size(); i++)
 	{
-		if (UnitPool[i] == UnitPoolDelete.back())
+		if (UnitPoolSelect[i] == UnitPoolDelete.back())
 		{
-			UnitPoolSelect.erase(UnitPool.begin() + i);
-			UnitPoolSelect.shrink_to_fit();
+			UnitPoolSelect.erase(UnitPoolSelect.begin() + i);
+			//UnitPoolSelect.shrink_to_fit();
 			flag = true;
 			break;
 		}
