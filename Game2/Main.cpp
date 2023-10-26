@@ -97,10 +97,16 @@ void Main::Update()
 	{
 		Unit* temp = new Unit();
 		temp->SetWorldPos(INPUT->GetWorldMousePos());
-		temp->playerNum = pNumber++;
+		temp->playerNum = 0;
 		SSYSTEM->UnitPool.push_back(temp);
 	}
-
+	if (INPUT->KeyDown(VK_F6))
+	{
+		Unit* temp = new Unit();
+		temp->SetWorldPos(INPUT->GetWorldMousePos());
+		temp->playerNum = 1;
+		SSYSTEM->UnitPool.push_back(temp);
+	}
 	if (INPUT->KeyPress(VK_LEFT))
 	{
 		app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);

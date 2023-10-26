@@ -320,6 +320,7 @@ void SystemManager::DeleteUnitPool()
 		{
 			UnitPoolSelect.erase(UnitPoolSelect.begin() + i);
 			//UnitPoolSelect.shrink_to_fit();
+
 			flag = true;
 			break;
 		}

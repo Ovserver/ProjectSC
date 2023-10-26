@@ -417,8 +417,8 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 		return false;//제자리 멈추기
 	}
 	//둘중에 하나가 벽이면 갈 수 있는길이 없다.
-	if (Tiles[dest.x][dest.y].state == TILE_WALL ||
-		Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
+	if (Tiles[dest.x][dest.y].state == TILE_WALL )
+		//||		Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
 	{
 		bool flag = false;
 		int count = 1;
@@ -600,7 +600,8 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 			Tile* loop =
 				&Tiles[LoopIdx[i].idx.x][LoopIdx[i].idx.y];
 			//벽이 아닐때
-			if (loop->state != TILE_WALL && loop->tileColInfo == TileCol::NONE)
+			if (loop->state != TILE_WALL )
+				//&& loop->tileColInfo == TileCol::NONE)
 			{
 				//현재 가지고있는 비용이 클때
 				if (loop->G > Temp->G + LoopIdx[i].cost)
