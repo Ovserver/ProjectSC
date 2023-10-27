@@ -11,7 +11,16 @@ int PathFinder::approximateDistXY(int x1, int y1, int x2, int y2)
 
 tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y)
 {
-
+	if (start_x == end_x && start_y == end_y)
+	{
+		cout << "start end point equal\n";
+		return { vector<INTPAIR>(), 0 };
+	}
+	if (!walkability[end_x][end_y])
+	{
+		cout << "not walkable terrain\n";
+		return { vector<INTPAIR>(), 0 };
+	}
 	std::vector<int> direction_x = { 0, 1, 1, 1, 0, -1, -1, -1 };
 	std::vector<int> direction_y = { 1, 1, 0, -1, -1, -1, 0, 1 };
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();

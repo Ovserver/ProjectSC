@@ -67,7 +67,7 @@ public:
 				return &node;
 			}
 		}
-		Node newNode(10, 10, this);
+		Node newNode(x, y, this);
 		nodes.push_back(newNode);
 		return &nodes.back();
 	}

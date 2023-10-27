@@ -15,7 +15,7 @@ Main::~Main()
 }
 void Main::Init()
 {
-	//map.file = "python.txt";
+	map.file = "python.txt";
 	map.Load();
 	map.CreateTileState();
 	map.ClusterResize();
@@ -340,6 +340,11 @@ void Main::Render()
 			cursor.SetWorldPos(INPUT->GetWorldMousePos());
 			cursor.Render();
 		}
+	}
+	for (size_t i = 0; i < pathway.size(); i++)
+	{
+		TestBox.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
+		TestBox.Render();
 	}
 }
 
