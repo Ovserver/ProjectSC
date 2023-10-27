@@ -17,7 +17,14 @@ void Main::Init()
 {
 	//map.file = "python.txt";
 	map.Load();
-	map.CreateTileCost();
+	map.CreateTileState();
+	map.ClusterResize();
+
+	//init pathfinding
+	PFINDER->initializeCluster(map);
+	PFINDER->createEntranceNodes(map);
+	PFINDER->calcInterPath(map);
+
 	mainPlayer.SetWorldPos(Vector2(500, 500));
 	boss.SetWorldPos(Vector2(500, 500));
 
@@ -82,6 +89,7 @@ void Main::Init()
 void Main::Release()
 {
 }
+vector<INTPAIR> pathway;
 UINT	pNumber = 0;
 void Main::Update()
 {
@@ -107,6 +115,11 @@ void Main::Update()
 		temp->playerNum = 1;
 		SSYSTEM->UnitPool.push_back(temp);
 	}
+	if (INPUT->KeyDown(VK_F8))
+	{
+		Vector2 ttmp = INPUT->GetWorldMousePos();
+		pathway = PFINDER->findCompletePath(map, app.maincam->GetWorldPos(), ttmp);
+	}
 	if (INPUT->KeyPress(VK_LEFT))
 	{
 		app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);
@@ -127,6 +140,7 @@ void Main::Update()
 }
 float intervalTime = 0;
 bool MoveLeftScreen = false, MoveRightScreen = false, MoveUpScreen = false, MoveDownScreen = false;
+
 void Main::LateUpdate()
 {
 	if (INPUT->GetScreenMousePos().y < 690)
@@ -233,21 +247,26 @@ void Main::LateUpdate()
 	{
 		mainPlayer.StepBack();
 	}
-	ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
-	ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
-	ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
-	ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
-	ImGui::Text("Unit Pool : %d", SSYSTEM->UnitPool.size());
-	ImGui::Text("Unit Pool Selected : %d", SSYSTEM->UnitPoolSelect.size());
-	ImGui::Text("TileCol Unit\n");
-	for (size_t i = 0; i < SSYSTEM->TileMap->tileSize.y; i++)
+	ImGui::Text("pathway");
+	for (size_t i = 0; i < pathway.size(); i++)
 	{
-		for (size_t j = 0; j < SSYSTEM->TileMap->tileSize.x; j++)
-		{
-			if (SSYSTEM->TileMap->Tiles[j][i].tileColInfo == TileCol::UNIT)
-				ImGui::Text("%d %d\n", j, i);
-		}
+	ImGui::Text("%d %d", pathway[i].first, pathway[i].second);
 	}
+	//ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
+	//ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
+	//ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
+	//ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
+	//ImGui::Text("Unit Pool : %d", SSYSTEM->UnitPool.size());
+	//ImGui::Text("Unit Pool Selected : %d", SSYSTEM->UnitPoolSelect.size());
+	//ImGui::Text("TileCol Unit\n");
+	//for (size_t i = 0; i < SSYSTEM->TileMap->tileSize.y; i++)
+	//{
+	//	for (size_t j = 0; j < SSYSTEM->TileMap->tileSize.x; j++)
+	//	{
+	//		if (SSYSTEM->TileMap->Tiles[j][i].tileColInfo == TileCol::UNIT)
+	//			ImGui::Text("%d %d\n", j, i);
+	//	}
+	//}
 	
 }
 void Main::Render()

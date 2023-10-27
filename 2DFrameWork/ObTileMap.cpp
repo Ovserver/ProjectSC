@@ -379,7 +379,7 @@ void ObTileMap::Load()
 	}
 }
 
-void ObTileMap::CreateTileCost()
+void ObTileMap::CreateTileState()
 {
 	//기존에 벡터를 초기화
 	for (int i = 0; i < Tiles.size(); i++)
@@ -395,7 +395,6 @@ void ObTileMap::CreateTileCost()
 		Tiles[i].resize(tileSize.y);
 	}
 
-
 	Vector2 half = scale * 0.5f;
 
 	for (int i = 0; i < tileSize.x; i++)
@@ -408,6 +407,27 @@ void ObTileMap::CreateTileCost()
 			Tiles[i][j].Pos.y = j * scale.y + GetWorldPos().y + half.y;
 		}
 	}
+
+	for (size_t i = 0; i < Tiles.size(); i++)
+	{
+		walkableTiles.push_back(vector<bool>());
+		for (size_t j = 0; j < Tiles[i].size(); j++)
+		{
+			if (Tiles[i][j].state == TILE_NONE)
+				walkableTiles.back().push_back(true);
+			else
+				walkableTiles.back().push_back(false);
+		}
+	}
+}
+
+void ObTileMap::ClusterResize()
+{	
+	cluster.resize(128 * 4 / CLUSTER_SCALE);
+	for (size_t i = 0; i < 128 * 4 / CLUSTER_SCALE; i++)
+	{
+		cluster[i].resize(128 * 4 / CLUSTER_SCALE);
+	}
 }
 
 bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
@@ -417,7 +437,7 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 		return false;//제자리 멈추기
 	}
 	//둘중에 하나가 벽이면 갈 수 있는길이 없다.
-	if (Tiles[dest.x][dest.y].state == TILE_WALL )
+	if (Tiles[dest.x][dest.y].state == TILE_WALL)
 		//||		Tiles[dest.x][dest.y].tileColInfo == TileCol::UNIT)
 	{
 		bool flag = false;
@@ -463,7 +483,7 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 	//기존에 있던 길은 전부 비운다.
 	way.clear();
 	//출발지 목적지 같으면
-	
+
 
 	//타일 비용 초기화
 	for (int i = 0; i < tileSize.x; i++)
@@ -600,7 +620,7 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 			Tile* loop =
 				&Tiles[LoopIdx[i].idx.x][LoopIdx[i].idx.y];
 			//벽이 아닐때
-			if (loop->state != TILE_WALL )
+			if (loop->state != TILE_WALL)
 				//&& loop->tileColInfo == TileCol::NONE)
 			{
 				//현재 가지고있는 비용이 클때

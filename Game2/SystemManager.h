@@ -51,5 +51,4 @@ public:
 	CmdIconPool*	IconPoolTemp;
 	CmdIconPool*	IconPoolTempSelect;
 	CmdIconPool		IconPoolSelect;
-
 };

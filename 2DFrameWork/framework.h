@@ -106,7 +106,8 @@ extern Application app;//Extern Global
 #include "ObStar.h"
 #include "ObImage.h"
 #include "ObTileMap.h"
-
+#include "NewPathfinder.h"
+#include "HierarchicalPathfinder.h"
 
 //Singleton Macro
 #define	D3D			Direct3D11::GetInstance()

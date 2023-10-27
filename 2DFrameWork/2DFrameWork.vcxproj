@@ -163,7 +163,9 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Gui.h" />
+    <ClInclude Include="HierarchicalPathfinder.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="NewPathfinder.h" />
     <ClInclude Include="ObCircle.h" />
     <ClInclude Include="ObImage.h" />
     <ClInclude Include="ObLine.h" />
@@ -185,7 +187,9 @@
     <ClCompile Include="Direct3D11.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Gui.cpp" />
+    <ClCompile Include="HierarchicalPathfinder.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="NewPathfinder.cpp" />
     <ClCompile Include="ObCircle.cpp" />
     <ClCompile Include="ObImage.cpp" />
     <ClCompile Include="ObLine.cpp" />

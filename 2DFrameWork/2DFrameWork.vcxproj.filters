@@ -62,6 +62,12 @@
     <ClInclude Include="ObTileMap.h">
       <Filter>GameObject</Filter>
     </ClInclude>
+    <ClInclude Include="NewPathfinder.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="HierarchicalPathfinder.h">
+      <Filter>GameObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="System">
@@ -127,6 +133,12 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="ObTileMap.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="NewPathfinder.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="HierarchicalPathfinder.cpp">
       <Filter>GameObject</Filter>
     </ClCompile>
   </ItemGroup>
