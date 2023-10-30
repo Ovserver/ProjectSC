@@ -118,8 +118,19 @@ void Main::Update()
 		ShowCursor(showCursor = !showCursor);
 	if (INPUT->KeyDown(VK_F3))
 		showTileMap = !showTileMap;
-	if (INPUT->KeyDown(VK_F4))
-		app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
+	if (INPUT->KeyPress(VK_F4))
+	{
+		if(INPUT->KeyDown('1'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
+		if (INPUT->KeyDown('2'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 16, TILESCALE * 16) * IMGSCALE);
+		if (INPUT->KeyDown('3'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 16, TILESCALE * 112) * IMGSCALE);
+		if (INPUT->KeyDown('4'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 112, TILESCALE * 16) * IMGSCALE);
+		if (INPUT->KeyDown('5'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 112, TILESCALE * 112) * IMGSCALE);
+	}
 	if (INPUT->KeyDown(VK_F5))
 	{
 		Unit* temp = new Unit();

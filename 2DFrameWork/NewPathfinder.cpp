@@ -9,7 +9,7 @@ int PathFinder::approximateDistXY(int x1, int y1, int x2, int y2)
 	return e1 * 10 + e2 * 14;
 }
 
-tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y)
+tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const vector<vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y)
 {
 	if (start_x == end_x && start_y == end_y)
 	{
@@ -21,17 +21,17 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 		cout << "not walkable terrain\n";
 		return { vector<INTPAIR>(), -1 };
 	}
-	std::vector<int> direction_x = { 0, 1, 1, 1, 0, -1, -1, -1 };
-	std::vector<int> direction_y = { 1, 1, 0, -1, -1, -1, 0, 1 };
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	vector<int> direction_x = { 0, 1, 1, 1, 0, -1, -1, -1 };
+	vector<int> direction_y = { 1, 1, 0, -1, -1, -1, 0, 1 };
+	chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
 
 	int grid_width = walkability.size();
 	int grid_height = walkability[0].size();
 
-	std::vector<std::vector<int>> from_start_distance_map(grid_width, std::vector<int>(grid_height, 100000));
-	std::vector<std::vector<int>> direction_map(grid_width, std::vector<int>(grid_height, 8));
+	vector<vector<int>> from_start_distance_map(grid_width, vector<int>(grid_height, 100000));
+	vector<vector<int>> direction_map(grid_width, vector<int>(grid_height, 8));
 
-	std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> open_nodes;
+	priority_queue<INTPAIR, vector<INTPAIR>, greater<INTPAIR>> open_nodes;
 
 	int start_end_dist = approximateDistXY(start_x, start_y, end_x, end_y);
 	open_nodes.push({ start_end_dist, start_x * grid_height + start_y });
@@ -61,9 +61,9 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 				current_direction = next_direction;
 			}
 
-			auto t2 = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-			std::cout << "Path found in " << duration.count() << " microseconds" << std::endl;
+			auto t2 = chrono::high_resolution_clock::now();
+			auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1);
+			cout << "Path found in " << duration.count() << " microseconds" << endl;
 			return make_tuple(path, from_start_dist);
 		}
 
@@ -98,9 +98,9 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 			}
 		}
 	}
-	auto t2 = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-	std::cout << "No path found in " << duration.count() << " microseconds" << std::endl;
+	auto t2 = chrono::high_resolution_clock::now();
+	auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1);
+	cout << "No path found in " << duration.count() << " microseconds" << endl;
 	return make_tuple(vector<INTPAIR>(), -1);
 
 }

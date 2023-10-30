@@ -46,28 +46,29 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 			Cluster* leftCluster = clusters[i][j];
 			Cluster* rightCluster = clusters[i + 1][j];
 
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
+			int n = 0;
+			int k;
+			for (k = 0; k < CLUSTER_SCALE; ++k) {
 				if (walkability[offset_x][offset_y + k] && walkability[offset_x + 1][offset_y + k]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
-					}
-					// 마지막칸이 walkable인 경우 어떻게 처리할지.
-					if (start != -1) {
-						int mid = (start + k - 1) / 2;
-
+					++n;
+				}
+				else {
+					if (n > 0) {
+						int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
 						Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
 						Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-						//leftCluster->nodes.back().addIntraAdjacentNode(node_10);
-						//rightCluster->nodes.back().addIntraAdjacentNode(node_00);
 						node_00->addIntraAdjacentNode(node_10);
 						node_10->addIntraAdjacentNode(node_00);
-
-						start = -1;
+						n = 0;
 					}
 				}
+			}
+			if (n != 0) {
+				int mid = n > 1 ? k - (n / 2) : k;
+				Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
+				Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
+				node_00->addIntraAdjacentNode(node_10);
+				node_10->addIntraAdjacentNode(node_00);
 			}
 		}
 	}
@@ -81,106 +82,35 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 			Cluster* topCluster = clusters[i][j];
 			Cluster* bottomCluster = clusters[i][j + 1];
 
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
+			int n = 0;
+			int k;
+			for (k = 0; k < CLUSTER_SCALE; ++k) {
 				if (walkability[offset_x + k][offset_y] && walkability[offset_x + k][offset_y + 1]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
+					++n;
+				}
+				else {
+					if (n > 0)
+					{
+						int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
+						Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
+						Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
+						node_00->addIntraAdjacentNode(node_10);
+						node_10->addIntraAdjacentNode(node_00);
+						n = 0;
 					}
 				}
-
-				if (start != -1) {
-					int mid = (start + k - 1) / 2;
-
-					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
-					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
-					//topCluster->nodes.back().addIntraAdjacentNode(node_10);
-					//bottomCluster->nodes.back().addIntraAdjacentNode(node_00);
-					node_00->addIntraAdjacentNode(node_10);
-					node_10->addIntraAdjacentNode(node_00);
-					start = -1;
-				}
+			}
+			if (n != 0) {
+				int mid = n > 1 ? k - (n / 2) : k;
+				Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
+				Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
+				node_00->addIntraAdjacentNode(node_10);
+				node_10->addIntraAdjacentNode(node_00);
 			}
 		}
 	}
 }
-/*
-void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
-{
-	int clusterWidthNumber = gameMap.tileSize.x / CLUSTER_SCALE;
-	int clusterHeightNumber = gameMap.tileSize.y / CLUSTER_SCALE;
 
-	const vector<vector<bool>>& walkability = gameMap.walkableTiles;
-	vector<vector<Cluster*>>& clusters = gameMap.cluster;
-	int entranceCount = 0;
-
-	// 세로 방향 entrance
-	for (int i = 0; i < clusterWidthNumber - 1; ++i) {
-		for (int j = 0; j < clusterHeightNumber; ++j) {
-			int offset_x = i * CLUSTER_SCALE + CLUSTER_SCALE - 1;
-			int offset_y = j * CLUSTER_SCALE;
-
-			int start = -1;
-			Cluster* leftCluster = clusters[i][j];
-			Cluster* rightCluster = clusters[i + 1][j];
-
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
-				if (walkability[offset_x][offset_y + k] && walkability[offset_x + 1][offset_y + k]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
-					}
-
-					int mid = (start + k - 1) / 2;
-
-					Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
-					Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-
-					node_00->addIntraAdjacentNode(node_10);
-					node_10->addIntraAdjacentNode(node_00);
-					start = -1;
-				}
-			}
-		}
-	}
-
-	// 가로 방향 entrance
-	for (int i = 0; i < clusterWidthNumber; ++i) {
-		for (int j = 0; j < clusterHeightNumber - 1; ++j) {
-			int offset_x = i * CLUSTER_SCALE;
-			int offset_y = j * CLUSTER_SCALE + CLUSTER_SCALE - 1;
-
-			int start = -1;
-			Cluster* topCluster = clusters[i][j];
-			Cluster* bottomCluster = clusters[i][j + 1];
-
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
-				if (walkability[offset_x + k][offset_y] && walkability[offset_x + k][offset_y + 1]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
-					}
-
-					int mid = (start + k - 1) / 2;
-
-					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
-					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
-
-					node_00->addIntraAdjacentNode(node_10);
-					node_10->addIntraAdjacentNode(node_00);
-					start = -1;
-				}
-			}
-		}
-	}
-}
-*/
 void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 {
 	vector<vector<Cluster*>>& clusters = gameMap.cluster;
@@ -212,7 +142,7 @@ void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 
 tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
 {
-	priority_queue<pair<int, Node*>,vector<pair<int, Node*>>, CompareNodes> openNodes;
+	priority_queue<pair<int, Node*>, vector<pair<int, Node*>>, CompareNodes> openNodes;
 	unordered_map<Node*, int> fromStartDistMap;
 	unordered_map<Node*, Node*> parentMap;
 
@@ -348,8 +278,8 @@ vector<INTPAIR> HierarchicalPathfinder::findCompletePath(ObTileMap& gameMap, Vec
 	}
 	else {
 		for (size_t i = 0; i < path.size(); ++i) {
-			int x = path[i].first * m + (m/2);
-			int y = path[i].second * m + (m/2);
+			int x = path[i].first * m + (m / 2);
+			int y = path[i].second * m + (m / 2);
 			path[i] = std::make_pair(x, y);
 		}
 		return path;

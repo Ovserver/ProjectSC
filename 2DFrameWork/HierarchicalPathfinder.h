@@ -7,7 +7,8 @@ public:
 	void calcInterPath(ObTileMap& gameMap);
 
 	struct CompareNodes {
-		bool operator()(const pair<int, Node*>& a, const pair<int, Node*>& b) {
+		bool operator()(const pair<int, Node*>& a, const pair<int, Node*>& b)
+		{
 			return a.first > b.first; // 작은 값 우선
 		}
 	};
