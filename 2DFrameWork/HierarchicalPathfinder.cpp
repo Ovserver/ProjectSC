@@ -32,7 +32,7 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 	int clusterWidthNumber = gameMap.tileSize.x / CLUSTER_SCALE;
 	int clusterHeightNumber = gameMap.tileSize.y / CLUSTER_SCALE;
 
-	const vector<vector<bool>>& walkability = gameMap.walkableTiles;
+	const vector<vector<bool>> walkability = gameMap.walkableTiles;
 	vector<vector<Cluster*>>& clusters = gameMap.cluster;
 	int entranceCount = 0;
 
@@ -60,7 +60,8 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 
 						Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
 						Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-
+						//leftCluster->nodes.back().addIntraAdjacentNode(node_10);
+						//rightCluster->nodes.back().addIntraAdjacentNode(node_00);
 						node_00->addIntraAdjacentNode(node_10);
 						node_10->addIntraAdjacentNode(node_00);
 
@@ -95,6 +96,81 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 
 					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
 					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
+					//topCluster->nodes.back().addIntraAdjacentNode(node_10);
+					//bottomCluster->nodes.back().addIntraAdjacentNode(node_00);
+					node_00->addIntraAdjacentNode(node_10);
+					node_10->addIntraAdjacentNode(node_00);
+					start = -1;
+				}
+			}
+		}
+	}
+}
+/*
+void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
+{
+	int clusterWidthNumber = gameMap.tileSize.x / CLUSTER_SCALE;
+	int clusterHeightNumber = gameMap.tileSize.y / CLUSTER_SCALE;
+
+	const vector<vector<bool>>& walkability = gameMap.walkableTiles;
+	vector<vector<Cluster*>>& clusters = gameMap.cluster;
+	int entranceCount = 0;
+
+	// 세로 방향 entrance
+	for (int i = 0; i < clusterWidthNumber - 1; ++i) {
+		for (int j = 0; j < clusterHeightNumber; ++j) {
+			int offset_x = i * CLUSTER_SCALE + CLUSTER_SCALE - 1;
+			int offset_y = j * CLUSTER_SCALE;
+
+			int start = -1;
+			Cluster* leftCluster = clusters[i][j];
+			Cluster* rightCluster = clusters[i + 1][j];
+
+			for (int k = 0; k < CLUSTER_SCALE; ++k) {
+				if (walkability[offset_x][offset_y + k] && walkability[offset_x + 1][offset_y + k]) {
+					if (start == -1) {
+						start = k;
+					}
+					if (k < CLUSTER_SCALE - 1) {
+						continue;
+					}
+
+					int mid = (start + k - 1) / 2;
+
+					Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
+					Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
+
+					node_00->addIntraAdjacentNode(node_10);
+					node_10->addIntraAdjacentNode(node_00);
+					start = -1;
+				}
+			}
+		}
+	}
+
+	// 가로 방향 entrance
+	for (int i = 0; i < clusterWidthNumber; ++i) {
+		for (int j = 0; j < clusterHeightNumber - 1; ++j) {
+			int offset_x = i * CLUSTER_SCALE;
+			int offset_y = j * CLUSTER_SCALE + CLUSTER_SCALE - 1;
+
+			int start = -1;
+			Cluster* topCluster = clusters[i][j];
+			Cluster* bottomCluster = clusters[i][j + 1];
+
+			for (int k = 0; k < CLUSTER_SCALE; ++k) {
+				if (walkability[offset_x + k][offset_y] && walkability[offset_x + k][offset_y + 1]) {
+					if (start == -1) {
+						start = k;
+					}
+					if (k < CLUSTER_SCALE - 1) {
+						continue;
+					}
+
+					int mid = (start + k - 1) / 2;
+
+					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
+					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
 
 					node_00->addIntraAdjacentNode(node_10);
 					node_10->addIntraAdjacentNode(node_00);
@@ -104,7 +180,7 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 		}
 	}
 }
-
+*/
 void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 {
 	vector<vector<Cluster*>>& clusters = gameMap.cluster;
@@ -136,7 +212,7 @@ void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 
 tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
 {
-	priority_queue<pair<int, Node*>> openNodes;
+	priority_queue<pair<int, Node*>,vector<pair<int, Node*>>, CompareNodes> openNodes;
 	unordered_map<Node*, int> fromStartDistMap;
 	unordered_map<Node*, Node*> parentMap;
 
@@ -165,8 +241,7 @@ tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(Ob
 			}
 			return { path, fromStartDist };
 		}
-
-		for (auto neighbor : curNode->neighbors) {
+		for (pair<Node*, pair<vector<INTPAIR>, int>> neighbor : curNode->neighbors) {
 			Node* neighborNode = neighbor.first;
 			int dist = neighbor.second.second;
 			int destDist = Node::approximateDist(neighborNode, endNode);
@@ -213,28 +288,31 @@ vector<INTPAIR> HierarchicalPathfinder::findPathInWalkTileGrid(ObTileMap& gameMa
 
 	// (1)임시로 start, end node 만들기
 	// 임시 node 이므로 cluster의 nodes(node list)에 추가하지는 않을거임.
+
 	Node startNode(startWalkTileX, startWalkTileY, &startCluster);
 	Node endNode(endWalkTileX, endWalkTileY, &endCluster);
 
 
 	// (2-1) start_node 와 start_cluster의 entrance node들과의 path 찾기
 	// 임시 node 이므로 cluster의 nodes(node list)에 추가하지 않음
-	for (Node& n : startCluster.nodes) {
-		tie(path, cost) = startCluster.findInterPath(startWalkTileX, startWalkTileY, n.x, n.y);
+
+	for (Node*& n : startCluster.nodes) {
+		tie(path, cost) = startCluster.findInterPath(startWalkTileX, startWalkTileY, n->x, n->y);
 		if (cost != -1) {
 			// start_node에서 entrance node로 갈 뿐이므로
 			// entrance node의 이웃으로 start_node를 추가하지는 않음.
-			startNode.addAdjacentNode(&n, path, cost);
+			startNode.addAdjacentNode(n, path, cost);
 		}
 	}
 
 	// (2-2) end_node 와 end_cluster의 entrance node들과의 path 찾기
-	for (Node& n : endCluster.nodes) {
-		tie(path, cost) = endCluster.findInterPath(n.x, n.y, endWalkTileX, endWalkTileY);
+
+	for (Node*& n : endCluster.nodes) {
+		tie(path, cost) = endCluster.findInterPath(n->x, n->y, endWalkTileX, endWalkTileY);
 		if (cost != -1) {
 			// entrance node에서 end_node로 갈 뿐이므로
 			// end_node의 이웃으로 entrance node를 추가하지는 않음.
-			n.addAdjacentNode(&endNode, path, cost);
+			n->addAdjacentNode(&endNode, path, cost);
 		}
 	}
 
@@ -242,8 +320,9 @@ vector<INTPAIR> HierarchicalPathfinder::findPathInWalkTileGrid(ObTileMap& gameMa
 
 	// (3) start_node는 entrance node의 이웃으로 start_node를 추가하지는
 	// 않았으므로 처리 안해도 됨. 반면 end_node는 없애 줘야함.
-	for (Node& n : endCluster.nodes) {
-		n.neighbors.erase(&endNode); //정확하지 않은 번역 유의
+
+	for (Node*& n : endCluster.nodes) {
+		n->neighbors.erase(&endNode); //정확하지 않은 번역 유의
 	}
 
 	auto t2 = chrono::high_resolution_clock::now();
@@ -269,8 +348,8 @@ vector<INTPAIR> HierarchicalPathfinder::findCompletePath(ObTileMap& gameMap, Vec
 	}
 	else {
 		for (size_t i = 0; i < path.size(); ++i) {
-			int x = path[i].first * m;
-			int y = path[i].second * m;
+			int x = path[i].first * m + (m/2);
+			int y = path[i].second * m + (m/2);
 			path[i] = std::make_pair(x, y);
 		}
 		return path;

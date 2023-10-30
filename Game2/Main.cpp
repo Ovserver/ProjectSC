@@ -24,16 +24,34 @@ void Main::Init()
 	PFINDER->initializeCluster(map);
 	PFINDER->createEntranceNodes(map);
 	PFINDER->calcInterPath(map);
+	for (size_t i = 0; i < map.cluster.size(); i++)
+	{
+		for (size_t j = 0; j < map.cluster[i].size(); j++)
+		{
+			cout << "cluster " << i << " " << j << " / size : " << map.cluster[i][j]->nodes.size() << map.cluster[i][j] << endl;
+			for (size_t k = 0; k < map.cluster[i][j]->nodes.size(); k++)
+			{
+				cout << "x : " <<
+					map.cluster[i][j]->nodes[k]->x << "/ y : " <<
+					map.cluster[i][j]->nodes[k]->y << "/ neighber : ";
+				cout << map.cluster[i][j]->nodes[k]->neighbors.size() << " / ";
+				for (auto neighbor : map.cluster[i][j]->nodes[k]->neighbors)
+					cout << neighbor.first->x << " " << neighbor.first->y << " / ";
+				cout << endl;
+			}
+
+		}
+	}
 
 	mainPlayer.SetWorldPos(Vector2(500, 500));
 	boss.SetWorldPos(Vector2(500, 500));
 
-	Utility2::InitImage(cursor, L"cursor/Idle.png",Vector2(0,0), 5);
+	Utility2::InitImage(cursor, L"cursor/Idle.png", Vector2(0, 0), 5);
 	cursor.ChangeAnim(ANIMSTATE::LOOP, 0.1f);
 	Utility2::InitImage(cursorDrag, L"cursor/Drag.png");
 
 	int n = 0;
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullB.png",Vector2(),2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullB.png", Vector2(), 2);
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLB.png", Vector2(), 2);
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullL.png", Vector2(), 2);
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLT.png", Vector2(), 2);
@@ -79,8 +97,8 @@ void Main::Init()
 	cam2.UpdateMatrix();
 
 	TestBox.SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
-	TestBox.SetScale().x = 100.0f;
-	TestBox.SetScale().y = 100.0f;
+	TestBox.SetScale().x = 10.0f;
+	TestBox.SetScale().y = 10.0f;
 
 	SSYSTEM->TileMap = &map;
 	SSYSTEM->UICam = &cam2;
@@ -89,6 +107,7 @@ void Main::Init()
 void Main::Release()
 {
 }
+Vector2 startPos;
 vector<INTPAIR> pathway;
 UINT	pNumber = 0;
 void Main::Update()
@@ -115,10 +134,14 @@ void Main::Update()
 		temp->playerNum = 1;
 		SSYSTEM->UnitPool.push_back(temp);
 	}
+	if (INPUT->KeyDown(VK_F7))
+	{
+		startPos = INPUT->GetWorldMousePos();
+	}
 	if (INPUT->KeyDown(VK_F8))
 	{
 		Vector2 ttmp = INPUT->GetWorldMousePos();
-		pathway = PFINDER->findCompletePath(map, app.maincam->GetWorldPos(), ttmp);
+		pathway = PFINDER->findCompletePath(map, startPos, ttmp);
 	}
 	if (INPUT->KeyPress(VK_LEFT))
 	{
@@ -210,9 +233,9 @@ void Main::LateUpdate()
 			{
 				MoveRightScreen = false;
 			}
-		}		
+		}
 		if (INPUT->KeyUp(VK_LBUTTON) && abs(SelectAreaCol.GetScale().x) > 2 && abs(SelectAreaCol.GetScale().y) > 2)
-		{			
+		{
 			SSYSTEM->UnitPoolSelect.clear();
 			for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 			{
@@ -250,7 +273,7 @@ void Main::LateUpdate()
 	ImGui::Text("pathway");
 	for (size_t i = 0; i < pathway.size(); i++)
 	{
-	ImGui::Text("%d %d", pathway[i].first, pathway[i].second);
+		ImGui::Text("%d %d", pathway[i].first, pathway[i].second);
 	}
 	//ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
 	//ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
@@ -267,13 +290,13 @@ void Main::LateUpdate()
 	//			ImGui::Text("%d %d\n", j, i);
 	//	}
 	//}
-	
+
 }
 void Main::Render()
 {
 	mapImage.Render();
 	if (showTileMap)
-		map.Render();	
+		map.Render();
 	console.Render(&cam2);
 	SSYSTEM->Render();
 	if (INPUT->KeyPress(VK_LBUTTON))
@@ -341,8 +364,27 @@ void Main::Render()
 			cursor.Render();
 		}
 	}
+	TestBox.color = Color(1, 0, 0);
+	for (size_t i = 0; i < map.cluster.size(); i++)
+	{
+		for (size_t j = 0; j < map.cluster[i].size(); j++)
+		{
+			for (size_t k = 0; k < map.cluster[i][j]->nodes.size(); k++)
+			{
+				Vector2 vectors;
+				vectors.x = map.cluster[i][j]->nodes[k]->x;
+				vectors.y = map.cluster[i][j]->nodes[k]->y;
+				TestBox.SetWorldPos(vectors * 16 + Vector2(8, 8));
+				TestBox.Render();
+			}
+		}
+	}
+	TestBox.color = Color(0, 1, 0);
+	TestBox.SetWorldPos(startPos);
+	TestBox.Render();
 	for (size_t i = 0; i < pathway.size(); i++)
 	{
+		TestBox.color = Color((float)i / (float)(pathway.size() - 1), 1, 0);
 		TestBox.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
 		TestBox.Render();
 	}

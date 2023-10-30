@@ -14,12 +14,12 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 	if (start_x == end_x && start_y == end_y)
 	{
 		cout << "start end point equal\n";
-		return { vector<INTPAIR>(), 0 };
+		return { vector<INTPAIR>(), -1 };
 	}
 	if (!walkability[end_x][end_y])
 	{
 		cout << "not walkable terrain\n";
-		return { vector<INTPAIR>(), 0 };
+		return { vector<INTPAIR>(), -1 };
 	}
 	std::vector<int> direction_x = { 0, 1, 1, 1, 0, -1, -1, -1 };
 	std::vector<int> direction_y = { 1, 1, 0, -1, -1, -1, 0, 1 };
@@ -110,4 +110,72 @@ Node::Node(int _x, int _y, Cluster* _cluster)
 	x = _x;
 	y = _y;
 	cluster = _cluster;
+}
+
+Node* Cluster::addNode(int x, int y)
+{
+	for (Node*& node : nodes) {
+		if (node->x == x && node->y == y) {
+			return node;
+		}
+	}
+	Node* newNode = new Node(x, y, this);
+	nodes.push_back(newNode);
+	return nodes.back();
+}
+
+void Cluster::findInterPathOfAllNodes()
+{
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		Node* startNode = nodes[i];
+		for (size_t j = 0; j < i; ++j) {
+			Node* endNode = nodes[j];
+			vector<INTPAIR> path;
+			int cost;
+			tie(path, cost) = findInterPath(startNode->x, startNode->y, endNode->x, endNode->y);
+			if (cost != -1) {
+				startNode->addAdjacentNode(endNode, path, cost);
+
+				//path 거꾸로 해서 end_node에 start_node를 이웃으로 추가.
+				std::vector<INTPAIR> path2;
+				for (int k = static_cast<int>(path.size()) - 1; k >= 0; --k) {
+					path2.push_back(make_pair(path[k].first, path[k].second));
+				}
+				endNode->addAdjacentNode(startNode, path2, cost);
+			}
+		}
+	}
+}
+
+tuple<vector<INTPAIR>, int> Cluster::findInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY)
+{
+	int x_offset = grid_x * CLUSTER_SCALE;
+	int y_offset = grid_y * CLUSTER_SCALE;
+
+	if (is_free) {
+		return make_tuple(vector<INTPAIR> { { worldEndX, worldEndY }},
+			PathFinder::approximateDistXY(worldStartX, worldStartY, worldEndX, worldEndY));
+	}
+
+	int local_start_x = worldStartX - x_offset;
+	int local_start_y = worldStartY - y_offset;
+	int local_end_x = worldEndX - x_offset;
+	int local_end_y = worldEndY - y_offset;
+
+	int cost;
+	vector<INTPAIR> local_path;
+	tie(local_path, cost) = PathFinder::aStarPathFind(walkability, local_start_x, local_start_y, local_end_x, local_end_y);
+
+	if (local_path.empty()) {
+		return make_tuple(local_path, cost);
+	}
+
+	vector<INTPAIR> world_path;
+	for (const auto& local_coord : local_path) {
+		int local_x = local_coord.first;
+		int local_y = local_coord.second;
+		world_path.push_back({ local_x + x_offset, local_y + y_offset });
+	}
+
+	return make_tuple(world_path, cost);
 }
