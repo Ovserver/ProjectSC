@@ -51,6 +51,7 @@ using namespace SimpleMath;
 #include "../Libs/Fmod/fmod.hpp"
 #pragma comment(lib, "../Libs/Fmod/fmodL_vc.lib")
 
+#define CONSTANT_DISTANCE 400
 #define IMGSCALE 2.0f
 #define TILESCALE 32.0f
 #define FRAME(frame) (1.0f / frame)

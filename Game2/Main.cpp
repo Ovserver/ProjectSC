@@ -21,9 +21,11 @@ void Main::Init()
 	map.ClusterResize();
 
 	//init pathfinding
-	PFINDER->initializeCluster(map);
-	PFINDER->createEntranceNodes(map);
-	PFINDER->calcInterPath(map);
+	PFINDER->InitializeCluster(map);
+	PFINDER->CreateEntranceNodes(map);
+	PFINDER->CalcInterPath(map);
+
+	Unit::GameMap = &map;
 	for (size_t i = 0; i < map.cluster.size(); i++)
 	{
 		for (size_t j = 0; j < map.cluster[i].size(); j++)
@@ -152,7 +154,7 @@ void Main::Update()
 	if (INPUT->KeyDown(VK_F8))
 	{
 		Vector2 ttmp = INPUT->GetWorldMousePos();
-		pathway = PFINDER->findCompletePath(map, startPos, ttmp);
+		pathway = PFINDER->FindCompletePath(map, startPos, ttmp);
 	}
 	if (INPUT->KeyPress(VK_LEFT))
 	{
@@ -395,10 +397,13 @@ void Main::Render()
 	TestBox.Render();
 	for (size_t i = 0; i < pathway.size(); i++)
 	{
-		TestBox.color = Color((float)i / (float)(pathway.size() - 1), 1, 0);
+		TestBox.color = Color((float)i / (float)(pathway.size()), (float)i / (float)(pathway.size()), 0);
 		TestBox.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
 		TestBox.Render();
 	}
+	TestBox.color = Color(0, 1, 0);
+	TestBox.SetWorldPos(INPUT->GetWorldMousePos());
+	TestBox.Render();
 }
 
 void Main::ResizeScreen()

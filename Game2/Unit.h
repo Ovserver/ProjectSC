@@ -22,6 +22,7 @@ public:
 	void SetWorldPos(Vector2 pos) { col.SetWorldPos(pos); }
 	Vector2 GetFoot() { return col.GetWorldPos() + Vector2(0, 10) + keyDir * 10.0f; }
 	void InitPath(vector<Tile*> way);
+	void InitPath2(vector<INTPAIR> way);
 	void GetHealth(int& _hp, int& _maxHp) { _hp = hp; _maxHp = maxHp; }
 	void Damage(UINT value) { hp -= value; if (hp <= 0) { hp = 0; Death(); } };
 	void Death();
@@ -30,7 +31,9 @@ public:
 	void Attack(Vector2 CommandPos);
 	void Hold();
 	void Stop();
+	void Stop2();
 public:
+	static ObTileMap* GameMap;
 	bool			pathfinding = false;
 	float			attackRange;
 	float			sightRange;
@@ -40,6 +43,7 @@ public:
 	Vector2			cmdPos;
 	Vector2			originPos;
 	vector<Tile*>	pathWay;
+	vector<INTPAIR>	pathWay2;
 	Unit*			targetCmdUnit;
 	CmdIconPool		IconPool;
 protected:
