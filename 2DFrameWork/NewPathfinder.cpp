@@ -137,11 +137,9 @@ void Cluster::findInterPathOfAllNodes()
 				startNode->addAdjacentNode(endNode, path, cost);
 
 				//path 거꾸로 해서 end_node에 start_node를 이웃으로 추가.
-				std::vector<INTPAIR> path2;
-				for (int k = static_cast<int>(path.size()) - 1; k >= 0; --k) {
-					path2.push_back(make_pair(path[k].first, path[k].second));
-				}
-				endNode->addAdjacentNode(startNode, path2, cost);
+
+				tie(path, cost) = findInterPath(endNode->x, endNode->y, startNode->x, startNode->y);
+				endNode->addAdjacentNode(startNode, path, cost);
 			}
 		}
 	}

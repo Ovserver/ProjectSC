@@ -54,19 +54,19 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 					if (k < CLUSTER_SCALE - 1) {
 						continue;
 					}
-					// 마지막칸이 walkable인 경우 어떻게 처리할지.
-					if (start != -1) {
-						int mid = (start + k - 1) / 2;
+				}
+				// 마지막칸이 walkable인 경우 어떻게 처리할지.
+				if (start != -1) {
+					int mid = (start + k - 1) / 2;
 
-						Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
-						Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-						//leftCluster->nodes.back().addIntraAdjacentNode(node_10);
-						//rightCluster->nodes.back().addIntraAdjacentNode(node_00);
-						node_00->addIntraAdjacentNode(node_10);
-						node_10->addIntraAdjacentNode(node_00);
+					Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
+					Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
+					//leftCluster->nodes.back().addIntraAdjacentNode(node_10);
+					//rightCluster->nodes.back().addIntraAdjacentNode(node_00);
+					node_00->addIntraAdjacentNode(node_10);
+					node_10->addIntraAdjacentNode(node_00);
 
-						start = -1;
-					}
+					start = -1;
 				}
 			}
 		}
@@ -212,7 +212,7 @@ void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 
 tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
 {
-	priority_queue<pair<int, Node*>,vector<pair<int, Node*>>, CompareNodes> openNodes;
+	priority_queue<pair<int, Node*>, vector<pair<int, Node*>>, CompareNodes> openNodes;
 	unordered_map<Node*, int> fromStartDistMap;
 	unordered_map<Node*, Node*> parentMap;
 
@@ -236,7 +236,8 @@ tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(Ob
 			while (nNode != startNode) {
 				Node* parent = parentMap[nNode];
 				vector<INTPAIR> toParentPath = parent->neighbors[nNode].first;
-				path.insert(path.end(), toParentPath.rbegin(), toParentPath.rend());
+				
+				path.insert(path.end(), toParentPath.begin(), toParentPath.end());
 				nNode = parent;
 			}
 			return { path, fromStartDist };
@@ -348,8 +349,8 @@ vector<INTPAIR> HierarchicalPathfinder::findCompletePath(ObTileMap& gameMap, Vec
 	}
 	else {
 		for (size_t i = 0; i < path.size(); ++i) {
-			int x = path[i].first * m + (m/2);
-			int y = path[i].second * m + (m/2);
+			int x = path[i].first * m + (m / 2);
+			int y = path[i].second * m + (m / 2);
 			path[i] = std::make_pair(x, y);
 		}
 		return path;
