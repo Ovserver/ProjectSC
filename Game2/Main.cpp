@@ -20,6 +20,7 @@ void Main::Init()
 	map.CreateTileState();
 	map.ClusterResize();
 
+	Unit::GameMap = &map;
 	//init pathfinding
 	PFINDER->InitializeCluster(map);
 	PFINDER->CreateEntranceNodes(map);

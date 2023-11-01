@@ -22,7 +22,11 @@ public:
 	void SetWorldPos(Vector2 pos) { col.SetWorldPos(pos); }
 	Vector2 GetFoot() { return col.GetWorldPos() + Vector2(0, 10) + keyDir * 10.0f; }
 	void InitPath(vector<Tile*> way);
+<<<<<<< Updated upstream
 	void InitPath2(vector<INTPAIR> way);
+=======
+	void InitPath(vector<INTPAIR> way);
+>>>>>>> Stashed changes
 	void GetHealth(int& _hp, int& _maxHp) { _hp = hp; _maxHp = maxHp; }
 	void Damage(UINT value) { hp -= value; if (hp <= 0) { hp = 0; Death(); } };
 	void Death();
@@ -67,6 +71,6 @@ private:
 	float			tickAttackCooldown = 0;
 	const float		attackCooldown = 1.0f;
 	float			tickPathUpdateTime = 0;
-	const float		PathUpdateTime = 0.5f;
+	const float		PathUpdateTime = 1.0f;
 	UnitCmd			unitCmd;
 };

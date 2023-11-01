@@ -80,7 +80,6 @@ void Unit::Update()
 	{
 		if (TIMER->GetTick(tickPathUpdateTime, PathUpdateTime))
 		{
-			vector<Tile*> temp;
 			Vector2	commandPostemp;
 
 			if (unitCmd == UnitCmd::ATTACK)
@@ -92,6 +91,7 @@ void Unit::Update()
 			}
 			else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
 			// pathfinding을 특정 이벤트 발생 시 갱신하도록 함수화 하여 수정하기
+<<<<<<< Updated upstream
 			pathWay2 = PFINDER->FindCompletePath(*GameMap, GetWorldPos(), commandPostemp);
 			if (pathWay2.empty())
 			{
@@ -99,9 +99,14 @@ void Unit::Update()
 				cout << "pathClear\n";
 			}
 			else
+=======
+			pathWay2 = PFINDER->findCompletePath(*GameMap, GetWorldPos(), commandPostemp);
+			if (pathWay2.empty())
+>>>>>>> Stashed changes
 			{
 				
 			}
+<<<<<<< Updated upstream
 			//vector<Tile*> temp;
 			//Vector2	commandPostemp;
 
@@ -124,6 +129,12 @@ void Unit::Update()
 			//	Stop();
 			//	cout << "pathClear\n";
 			//}
+=======
+			else
+			{
+				InitPath(pathWay2);
+			}
+>>>>>>> Stashed changes
 		}
 	}
 	if (pathfinding)
@@ -131,6 +142,7 @@ void Unit::Update()
 		if (unitState == UnitState::MOVE)
 		{
 			if (pathWay2.empty())
+<<<<<<< Updated upstream
 			{
 				Stop2();
 				return;
@@ -148,11 +160,14 @@ void Unit::Update()
 				pathWay2.pop_back();
 			}
 			/*if (pathWay.empty())
+=======
+>>>>>>> Stashed changes
 			{
 				Stop();
 				return;
 			}
-			moveDir = pathWay.back()->Pos - col.GetWorldPos();
+			Vector2 lastPath(pathWay2.back().first, pathWay2.back().second);
+			moveDir = lastPath - col.GetWorldPos();
 			if (moveDir.Length() > moveSpeed * DELTA)
 			{
 				moveDir.Normalize();
@@ -161,9 +176,15 @@ void Unit::Update()
 			}
 			else
 			{
+<<<<<<< Updated upstream
 				col.SetWorldPos(pathWay.back()->Pos);
 				pathWay.pop_back();
 			}*/
+=======
+				col.SetWorldPos(lastPath);
+				pathWay2.pop_back();
+			}
+>>>>>>> Stashed changes
 		}
 		else if (unitState == UnitState::IDLE)
 		{
@@ -303,6 +324,13 @@ void Unit::InitPath(vector<Tile*> way)
 	unitState = UnitState::MOVE;
 	spriteMove.ChangeAnim(ANIMSTATE::LOOP, FRAME(18), false);
 }
+void Unit::InitPath(vector<INTPAIR> way)
+{
+	pathWay2 = way;
+
+	unitState = UnitState::MOVE;
+	spriteMove.ChangeAnim(ANIMSTATE::LOOP, FRAME(18), false);
+}
 
 void Unit::InitPath2(vector<INTPAIR> way)
 {
@@ -360,6 +388,7 @@ void Unit::Hold()
 void Unit::Stop()
 {
 	pathWay.clear();
+	pathWay2.clear();
 	pathfinding = false;
 	unitCmd = UnitCmd::STOP;
 	unitState = UnitState::IDLE;
