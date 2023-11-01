@@ -100,7 +100,7 @@ void Unit::Update()
 			}
 			else
 			{
-				
+				InitPath2(pathWay2);
 			}
 			//vector<Tile*> temp;
 			//Vector2	commandPostemp;

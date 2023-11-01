@@ -46,29 +46,26 @@ void HierarchicalPathfinder::CreateEntranceNodes(ObTileMap& gameMap)
 			Cluster* leftCluster = clusters[i][j];
 			Cluster* rightCluster = clusters[i + 1][j];
 
-			int n = 0;
-			int k;
-			for (k = 0; k < CLUSTER_SCALE; ++k) {
+			for (int k = 0; k < CLUSTER_SCALE; ++k) {
 				if (walkability[offset_x][offset_y + k] && walkability[offset_x + 1][offset_y + k]) {
-					++n;
-				}
-				else {
-					if (n > 0) {
-						int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
-						Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
-						Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-						node_00->AddIntraAdjacentNode(node_10);
-						node_10->AddIntraAdjacentNode(node_00);
-						n = 0;
+					if (start == -1) {
+						start = k;
+					}
+					if (k < CLUSTER_SCALE - 1) {
+						continue;
 					}
 				}
-			}
-			if (n != 0) {
-				int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
-				Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
-				Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-				node_00->AddIntraAdjacentNode(node_10);
-				node_10->AddIntraAdjacentNode(node_00);
+				// 마지막칸이 walkable인 경우 어떻게 처리할지.
+				if (start != -1) {
+					int mid = (start == 31 ? k : (start + k - 1) / 2);
+
+					Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
+					Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
+					node_00->AddIntraAdjacentNode(node_10);
+					node_10->AddIntraAdjacentNode(node_00);
+
+					start = -1;
+				}
 			}
 		}
 	}
@@ -82,30 +79,25 @@ void HierarchicalPathfinder::CreateEntranceNodes(ObTileMap& gameMap)
 			Cluster* topCluster = clusters[i][j];
 			Cluster* bottomCluster = clusters[i][j + 1];
 
-			int n = 0;
-			int k;
-			for (k = 0; k < CLUSTER_SCALE; ++k) {
+			for (int k = 0; k < CLUSTER_SCALE; ++k) {
 				if (walkability[offset_x + k][offset_y] && walkability[offset_x + k][offset_y + 1]) {
-					++n;
-				}
-				else {
-					if (n > 0)
-					{
-						int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
-						Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
-						Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
-						node_00->AddIntraAdjacentNode(node_10);
-						node_10->AddIntraAdjacentNode(node_00);
-						n = 0;
+					if (start == -1) {
+						start = k;
+					}
+					if (k < CLUSTER_SCALE - 1) {
+						continue;
 					}
 				}
-			}
-			if (n != 0) {
-				int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
-				Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
-				Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
-				node_00->AddIntraAdjacentNode(node_10);
-				node_10->AddIntraAdjacentNode(node_00);
+
+				if (start != -1) {
+					int mid = (start == 31 ? k : (start + k - 1) / 2);
+
+					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
+					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
+					node_00->AddIntraAdjacentNode(node_10);
+					node_10->AddIntraAdjacentNode(node_00);
+					start = -1;
+				}
 			}
 		}
 	}
@@ -167,11 +159,8 @@ tuple<vector<Node*>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTi
 			while (nNode != startNode) {
 				path.push_back(nNode);
 				Node* parent = parentMap[nNode];
+				reverse(parent->neighbors[nNode].first.begin(), parent->neighbors[nNode].first.end());
 				nNode = parent;
-				//Node* parent = parentMap[nNode];
-				//vector<INTPAIR> toParentPath = parent->neighbors[nNode].first;
-				//path.insert(path.end(), toParentPath.rbegin(), toParentPath.rend());
-				//nNode = parent;
 			}
 			return { path, fromStartDist };
 		}
