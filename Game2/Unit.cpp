@@ -3,6 +3,8 @@
 #include "SystemManager.h"
 #include "Unit.h"
 
+ObTileMap* Unit::GameMap = nullptr;
+
 Unit::Unit()
 {
 	maxHp = 100;
@@ -90,23 +92,62 @@ void Unit::Update()
 			}
 			else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
 			// pathfinding을 특정 이벤트 발생 시 갱신하도록 함수화 하여 수정하기
-			SSYSTEM->UpdateTileCol();
-			if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), commandPostemp, pathWay))
+			pathWay2 = PFINDER->FindCompletePath(*GameMap, GetWorldPos(), commandPostemp);
+			if (pathWay2.empty())
 			{
-				InitPath(pathWay);
+				Stop2();
+				cout << "pathClear\n";
 			}
 			else
 			{
-				Stop();
-				cout << "pathClear\n";
+				
 			}
+			//vector<Tile*> temp;
+			//Vector2	commandPostemp;
+
+			//if (unitCmd == UnitCmd::ATTACK)
+			//{
+			//	if (targetCmdUnit)
+			//		commandPostemp = targetCmdUnit->GetWorldPos();
+			//	else
+			//		commandPostemp = cmdPos;
+			//}
+			//else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
+			//// pathfinding을 특정 이벤트 발생 시 갱신하도록 함수화 하여 수정하기
+			//SSYSTEM->UpdateTileCol();
+			//if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), commandPostemp, pathWay))
+			//{
+			//	InitPath(pathWay);
+			//}
+			//else
+			//{
+			//	Stop();
+			//	cout << "pathClear\n";
+			//}
 		}
 	}
 	if (pathfinding)
 	{
 		if (unitState == UnitState::MOVE)
 		{
-			if (pathWay.empty())
+			if (pathWay2.empty())
+			{
+				Stop2();
+				return;
+			}
+			moveDir = Vector2(pathWay2.back().first, pathWay2.back().second) - col.GetWorldPos();
+			if (moveDir.Length() > moveSpeed * DELTA)
+			{
+				moveDir.Normalize();
+				col.MoveWorldPos(moveDir * moveSpeed * DELTA);
+				lookDir(moveDir);
+			}
+			else
+			{
+				col.SetWorldPos(Vector2(pathWay2.back().first, pathWay2.back().second));
+				pathWay2.pop_back();
+			}
+			/*if (pathWay.empty())
 			{
 				Stop();
 				return;
@@ -122,11 +163,11 @@ void Unit::Update()
 			{
 				col.SetWorldPos(pathWay.back()->Pos);
 				pathWay.pop_back();
-			}
+			}*/
 		}
 		else if (unitState == UnitState::IDLE)
 		{
-			Stop();
+			Stop2();
 		}
 	}
 	if ((unitCmd == UnitCmd::STOP || unitCmd == UnitCmd::ATTACK || unitCmd == UnitCmd::PATROL || unitCmd == UnitCmd::HOLD))
@@ -263,6 +304,14 @@ void Unit::InitPath(vector<Tile*> way)
 	spriteMove.ChangeAnim(ANIMSTATE::LOOP, FRAME(18), false);
 }
 
+void Unit::InitPath2(vector<INTPAIR> way)
+{
+	pathWay2 = way;
+
+	unitState = UnitState::MOVE;
+	spriteMove.ChangeAnim(ANIMSTATE::LOOP, FRAME(18), false);
+}
+
 void Unit::Death()
 {
 	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
@@ -311,6 +360,18 @@ void Unit::Hold()
 void Unit::Stop()
 {
 	pathWay.clear();
+	pathfinding = false;
+	unitCmd = UnitCmd::STOP;
+	unitState = UnitState::IDLE;
+	spriteMove.ChangeAnim(ANIMSTATE::STOP, 0.1f, false);
+	spriteMove.frame.y = 0;
+	tickPathUpdateTime = PathUpdateTime;
+	targetCmdUnit = nullptr;
+	cout << "Command Stop " << endl;
+}
+void Unit::Stop2()
+{
+	pathWay2.clear();
 	pathfinding = false;
 	unitCmd = UnitCmd::STOP;
 	unitState = UnitState::IDLE;

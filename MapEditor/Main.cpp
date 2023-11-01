@@ -27,7 +27,7 @@ void Main::Init()
 	LineY.SetScale().y = 20000.0f;
 
 	brushImgIdx = 0;
-	camSpeed = 300.0f;
+	camSpeed = 1200.0f;
 	ImageSize = 300.0f;
 	brushColor = Color(0.5f, 0.5f, 0.5f, 0.5f);
 	brushState = 0;
@@ -220,19 +220,19 @@ void Main::Update()
 
 	ImGui::End();
 
-	if (INPUT->KeyPress('W'))
+	if (INPUT->KeyPress('W') || INPUT->KeyPress(VK_UP))
 	{
 		app.maincam->MoveWorldPos( UP * camSpeed * DELTA);
 	}
-	if (INPUT->KeyPress('S'))
+	if (INPUT->KeyPress('S') || INPUT->KeyPress(VK_DOWN))
 	{
 		app.maincam->MoveWorldPos(DOWN * camSpeed * DELTA);
 	}
-	if (INPUT->KeyPress('A'))
+	if (INPUT->KeyPress('A') || INPUT->KeyPress(VK_LEFT))
 	{
 		app.maincam->MoveWorldPos(LEFT * camSpeed * DELTA);
 	}
-	if (INPUT->KeyPress('D'))
+	if (INPUT->KeyPress('D') || INPUT->KeyPress(VK_RIGHT))
 	{
 		app.maincam->MoveWorldPos(RIGHT * camSpeed * DELTA);
 	}

@@ -1,6 +1,6 @@
 #include "framework.h"
 
-void HierarchicalPathfinder::initializeCluster(ObTileMap& gameMap)
+void HierarchicalPathfinder::InitializeCluster(ObTileMap& gameMap)
 {
 	int clusterWidthNumber = gameMap.cluster[0].size();
 	int clusterHeightNumber = gameMap.cluster.size();
@@ -27,7 +27,7 @@ void HierarchicalPathfinder::initializeCluster(ObTileMap& gameMap)
 	}
 }
 
-void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
+void HierarchicalPathfinder::CreateEntranceNodes(ObTileMap& gameMap)
 {
 	int clusterWidthNumber = gameMap.tileSize.x / CLUSTER_SCALE;
 	int clusterHeightNumber = gameMap.tileSize.y / CLUSTER_SCALE;
@@ -36,7 +36,7 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 	vector<vector<Cluster*>>& clusters = gameMap.cluster;
 	int entranceCount = 0;
 
-	// ºº∑Œ πÊ«‚ entrance
+	// ÏÑ∏Î°ú Î∞©Ìñ• entrance
 	for (int i = 0; i < clusterWidthNumber - 1; ++i) {
 		for (int j = 0; j < clusterHeightNumber; ++j) {
 			int offset_x = i * CLUSTER_SCALE + CLUSTER_SCALE - 1;
@@ -46,7 +46,9 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 			Cluster* leftCluster = clusters[i][j];
 			Cluster* rightCluster = clusters[i + 1][j];
 
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
+			int n = 0;
+			int k;
+			for (k = 0; k < CLUSTER_SCALE; ++k) {
 				if (walkability[offset_x][offset_y + k] && walkability[offset_x + 1][offset_y + k]) {
 					if (start == -1) {
 						start = k;
@@ -55,7 +57,7 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 						continue;
 					}
 				}
-				// ∏∂¡ˆ∏∑ƒ≠¿Ã walkable¿Œ ∞ÊøÏ æÓ∂ª∞‘ √≥∏Æ«“¡ˆ.
+				// ÎßàÏßÄÎßâÏπ∏Ïù¥ walkableÏù∏ Í≤ΩÏö∞ Ïñ¥ÎñªÍ≤å Ï≤òÎ¶¨Ìï†ÏßÄ.
 				if (start != -1) {
 					int mid = (start + k - 1) / 2;
 
@@ -69,9 +71,16 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 					start = -1;
 				}
 			}
+			if (n != 0) {
+				int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
+				Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
+				Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
+				node_00->AddIntraAdjacentNode(node_10);
+				node_10->AddIntraAdjacentNode(node_00);
+			}
 		}
 	}
-	// ∞°∑Œ πÊ«‚ entrance
+	// Í∞ÄÎ°ú Î∞©Ìñ• entrance
 	for (int i = 0; i < clusterWidthNumber; ++i) {
 		for (int j = 0; j < clusterHeightNumber - 1; ++j) {
 			int offset_x = i * CLUSTER_SCALE;
@@ -81,107 +90,36 @@ void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
 			Cluster* topCluster = clusters[i][j];
 			Cluster* bottomCluster = clusters[i][j + 1];
 
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
+			int n = 0;
+			int k;
+			for (k = 0; k < CLUSTER_SCALE; ++k) {
 				if (walkability[offset_x + k][offset_y] && walkability[offset_x + k][offset_y + 1]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
+					++n;
+				}
+				else {
+					if (n > 0)
+					{
+						int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
+						Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
+						Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
+						node_00->AddIntraAdjacentNode(node_10);
+						node_10->AddIntraAdjacentNode(node_00);
+						n = 0;
 					}
 				}
-
-				if (start != -1) {
-					int mid = (start + k - 1) / 2;
-
-					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
-					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
-					//topCluster->nodes.back().addIntraAdjacentNode(node_10);
-					//bottomCluster->nodes.back().addIntraAdjacentNode(node_00);
-					node_00->addIntraAdjacentNode(node_10);
-					node_10->addIntraAdjacentNode(node_00);
-					start = -1;
-				}
+			}
+			if (n != 0) {
+				int mid = n > 1 ? k - (n / 2 + 1) : k - 1;
+				Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
+				Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
+				node_00->AddIntraAdjacentNode(node_10);
+				node_10->AddIntraAdjacentNode(node_00);
 			}
 		}
 	}
 }
-/*
-void HierarchicalPathfinder::createEntranceNodes(ObTileMap& gameMap)
-{
-	int clusterWidthNumber = gameMap.tileSize.x / CLUSTER_SCALE;
-	int clusterHeightNumber = gameMap.tileSize.y / CLUSTER_SCALE;
 
-	const vector<vector<bool>>& walkability = gameMap.walkableTiles;
-	vector<vector<Cluster*>>& clusters = gameMap.cluster;
-	int entranceCount = 0;
-
-	// ºº∑Œ πÊ«‚ entrance
-	for (int i = 0; i < clusterWidthNumber - 1; ++i) {
-		for (int j = 0; j < clusterHeightNumber; ++j) {
-			int offset_x = i * CLUSTER_SCALE + CLUSTER_SCALE - 1;
-			int offset_y = j * CLUSTER_SCALE;
-
-			int start = -1;
-			Cluster* leftCluster = clusters[i][j];
-			Cluster* rightCluster = clusters[i + 1][j];
-
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
-				if (walkability[offset_x][offset_y + k] && walkability[offset_x + 1][offset_y + k]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
-					}
-
-					int mid = (start + k - 1) / 2;
-
-					Node* node_00 = leftCluster->addNode(offset_x, offset_y + mid);
-					Node* node_10 = rightCluster->addNode(offset_x + 1, offset_y + mid);
-
-					node_00->addIntraAdjacentNode(node_10);
-					node_10->addIntraAdjacentNode(node_00);
-					start = -1;
-				}
-			}
-		}
-	}
-
-	// ∞°∑Œ πÊ«‚ entrance
-	for (int i = 0; i < clusterWidthNumber; ++i) {
-		for (int j = 0; j < clusterHeightNumber - 1; ++j) {
-			int offset_x = i * CLUSTER_SCALE;
-			int offset_y = j * CLUSTER_SCALE + CLUSTER_SCALE - 1;
-
-			int start = -1;
-			Cluster* topCluster = clusters[i][j];
-			Cluster* bottomCluster = clusters[i][j + 1];
-
-			for (int k = 0; k < CLUSTER_SCALE; ++k) {
-				if (walkability[offset_x + k][offset_y] && walkability[offset_x + k][offset_y + 1]) {
-					if (start == -1) {
-						start = k;
-					}
-					if (k < CLUSTER_SCALE - 1) {
-						continue;
-					}
-
-					int mid = (start + k - 1) / 2;
-
-					Node* node_00 = topCluster->addNode(offset_x + mid, offset_y);
-					Node* node_10 = bottomCluster->addNode(offset_x + mid, offset_y + 1);
-
-					node_00->addIntraAdjacentNode(node_10);
-					node_10->addIntraAdjacentNode(node_00);
-					start = -1;
-				}
-			}
-		}
-	}
-}
-*/
-void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
+void HierarchicalPathfinder::CalcInterPath(ObTileMap& gameMap)
 {
 	vector<vector<Cluster*>>& clusters = gameMap.cluster;
 	int interPathCount = 0;
@@ -191,7 +129,7 @@ void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 
 	for (auto& clusterRow : clusters) {
 		for (Cluster*& cluster : clusterRow) {
-			cluster->findInterPathOfAllNodes();
+			cluster->FindInterPathOfAllNodes();
 
 			int n = cluster->nodes.size();
 			if (n > maxEntranceNodeNumber) {
@@ -202,21 +140,21 @@ void HierarchicalPathfinder::calcInterPath(ObTileMap& gameMap)
 		}
 	}
 
-	std::cout << "max entrance number: " << maxEntranceNodeNumber << std::endl;
-	std::cout << "total_entrance: " << entranceCount << std::endl;
-	std::cout << "total_inter_path: " << interPathCount << std::endl;
+	cout << "max entrance number: " << maxEntranceNodeNumber << std::endl;
+	cout << "total_entrance: " << entranceCount << std::endl;
+	cout << "total_inter_path: " << interPathCount << std::endl;
 
-	std::time_t endTime = std::time(nullptr);
-	std::cout << "inter path calc time: " << (endTime - startTime) << " seconds" << std::endl;
+	time_t endTime = std::time(nullptr);
+	cout << "inter path calc time: " << (endTime - startTime) << " seconds" << std::endl;
 }
 
-tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
+tuple<vector<Node*>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
 {
 	priority_queue<pair<int, Node*>, vector<pair<int, Node*>>, CompareNodes> openNodes;
 	unordered_map<Node*, int> fromStartDistMap;
 	unordered_map<Node*, Node*> parentMap;
 
-	int dist = Node::approximateDist(startNode, endNode);
+	int dist = Node::ApproximateDist(startNode, endNode);
 	fromStartDistMap[startNode] = 0;
 	openNodes.push({ dist, startNode });
 
@@ -227,25 +165,31 @@ tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(Ob
 		int priority = minNode.first;
 		Node* curNode = minNode.second;
 
-		int destDist = Node::approximateDist(curNode, endNode);
+		int destDist = Node::ApproximateDist(curNode, endNode);
 		int fromStartDist = priority - destDist;
 
+		//Î™©ÌëúÏßÄÏ†ê ÎèÑÎã¨ Ïãú
 		if (curNode == endNode) {
-			std::vector<INTPAIR> path;
+			vector<Node*> path;
 			Node* nNode = endNode;
 			while (nNode != startNode) {
+				path.push_back(nNode);
 				Node* parent = parentMap[nNode];
 				vector<INTPAIR> toParentPath = parent->neighbors[nNode].first;
 				
 				path.insert(path.end(), toParentPath.begin(), toParentPath.end());
 				nNode = parent;
+				//Node* parent = parentMap[nNode];
+				//vector<INTPAIR> toParentPath = parent->neighbors[nNode].first;
+				//path.insert(path.end(), toParentPath.rbegin(), toParentPath.rend());
+				//nNode = parent;
 			}
 			return { path, fromStartDist };
 		}
 		for (pair<Node*, pair<vector<INTPAIR>, int>> neighbor : curNode->neighbors) {
 			Node* neighborNode = neighbor.first;
 			int dist = neighbor.second.second;
-			int destDist = Node::approximateDist(neighborNode, endNode);
+			int destDist = Node::ApproximateDist(neighborNode, endNode);
 			int newFromStartDist = fromStartDist + dist;
 
 			auto p = fromStartDistMap.find(neighborNode);
@@ -257,10 +201,10 @@ tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(Ob
 			}
 		}
 	}
-	return { vector<INTPAIR>(), -1 };
+	return { vector<Node*>(), -1 };
 }
 
-vector<INTPAIR> HierarchicalPathfinder::findPathInWalkTileGrid(ObTileMap& gameMap, int startWalkTileX, int startWalkTileY, int endWalkTileX, int endWalkTileY)
+vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMap, int startWalkTileX, int startWalkTileY, int endWalkTileX, int endWalkTileY)
 {
 	auto t1 = std::chrono::high_resolution_clock::now();
 	int startGridX = static_cast<int>(startWalkTileX / CLUSTER_SCALE);
@@ -274,64 +218,74 @@ vector<INTPAIR> HierarchicalPathfinder::findPathInWalkTileGrid(ObTileMap& gameMa
 	vector<INTPAIR> path;
 	int cost;
 
-	// case 1. ∞∞¿∫ Cluster ≥ªø° ¿÷¿ª ∞ÊøÏ
+	// case 1. Í∞ôÏùÄ Cluster ÎÇ¥Ïóê ÏûàÏùÑ Í≤ΩÏö∞
 	if (startGridX == endGridX && startGridY == endGridY) {
-		tie(path, cost) = startCluster.findInterPath(startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY);
+		tie(path, cost) = startCluster.FindInterPath(startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY);
 
-		// ∞Ê∑Œ ¡∏¿Á«œ∏È πŸ∑Œ ∏Æ≈œ. æ¯¿ª ∞ÊøÏ ¥ı ∫π¿‚«— ≈Ωªˆ¿ª «ÿæﬂ«‘.
+		// Í≤ΩÎ°ú Ï°¥Ïû¨ÌïòÎ©¥ Î∞îÎ°ú Î¶¨ÌÑ¥. ÏóÜÏùÑ Í≤ΩÏö∞ Îçî Î≥µÏû°Ìïú ÌÉêÏÉâÏùÑ Ìï¥ÏïºÌï®.
 		if (cost != -1) {
 			auto t2 = std::chrono::high_resolution_clock::now();
 			std::cout << "At same cluster! Path found at " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl;
 			return path;
 		}
 	}
-	// case 2. ¥Ÿ∏• Cluster¿œ ∞ÊøÏ 
+	// case 2. Îã§Î•∏ ClusterÏùº Í≤ΩÏö∞ 
 
-	// (1)¿”Ω√∑Œ start, end node ∏∏µÈ±‚
-	// ¿”Ω√ node ¿Ãπ«∑Œ cluster¿« nodes(node list)ø° √ﬂ∞°«œ¡ˆ¥¬ æ ¿ª∞≈¿”.
+	// (1)ÏûÑÏãúÎ°ú start, end node ÎßåÎì§Í∏∞
+	// ÏûÑÏãú node Ïù¥ÎØÄÎ°ú clusterÏùò nodes(node list)Ïóê Ï∂îÍ∞ÄÌïòÏßÄÎäî ÏïäÏùÑÍ±∞ÏûÑ.
 
 	Node startNode(startWalkTileX, startWalkTileY, &startCluster);
 	Node endNode(endWalkTileX, endWalkTileY, &endCluster);
 
 
-	// (2-1) start_node øÕ start_cluster¿« entrance nodeµÈ∞˙¿« path √£±‚
-	// ¿”Ω√ node ¿Ãπ«∑Œ cluster¿« nodes(node list)ø° √ﬂ∞°«œ¡ˆ æ ¿Ω
+	// (2-1) start_node ÏôÄ start_clusterÏùò entrance nodeÎì§Í≥ºÏùò path Ï∞æÍ∏∞
+	// ÏûÑÏãú node Ïù¥ÎØÄÎ°ú clusterÏùò nodes(node list)Ïóê Ï∂îÍ∞ÄÌïòÏßÄ ÏïäÏùå
 
 	for (Node*& n : startCluster.nodes) {
-		tie(path, cost) = startCluster.findInterPath(startWalkTileX, startWalkTileY, n->x, n->y);
+		tie(path, cost) = startCluster.FindInterPath(startWalkTileX, startWalkTileY, n->x, n->y);
 		if (cost != -1) {
-			// start_nodeø°º≠ entrance node∑Œ ∞• ª”¿Ãπ«∑Œ
-			// entrance node¿« ¿ÃøÙ¿∏∑Œ start_node∏¶ √ﬂ∞°«œ¡ˆ¥¬ æ ¿Ω.
-			startNode.addAdjacentNode(n, path, cost);
+			// start_nodeÏóêÏÑú entrance nodeÎ°ú Í∞à ÎøêÏù¥ÎØÄÎ°ú
+			// entrance nodeÏùò Ïù¥ÏõÉÏúºÎ°ú start_nodeÎ•º Ï∂îÍ∞ÄÌïòÏßÄÎäî ÏïäÏùå.
+			startNode.AddAdjacentNode(n, path, cost);
 		}
 	}
 
-	// (2-2) end_node øÕ end_cluster¿« entrance nodeµÈ∞˙¿« path √£±‚
+	// (2-2) end_node ÏôÄ end_clusterÏùò entrance nodeÎì§Í≥ºÏùò path Ï∞æÍ∏∞
 
 	for (Node*& n : endCluster.nodes) {
-		tie(path, cost) = endCluster.findInterPath(n->x, n->y, endWalkTileX, endWalkTileY);
+		tie(path, cost) = endCluster.FindInterPath(n->x, n->y, endWalkTileX, endWalkTileY);
 		if (cost != -1) {
-			// entrance nodeø°º≠ end_node∑Œ ∞• ª”¿Ãπ«∑Œ
-			// end_node¿« ¿ÃøÙ¿∏∑Œ entrance node∏¶ √ﬂ∞°«œ¡ˆ¥¬ æ ¿Ω.
-			n->addAdjacentNode(&endNode, path, cost);
+			// entrance nodeÏóêÏÑú end_nodeÎ°ú Í∞à ÎøêÏù¥ÎØÄÎ°ú
+			// end_nodeÏùò Ïù¥ÏõÉÏúºÎ°ú entrance nodeÎ•º Ï∂îÍ∞ÄÌïòÏßÄÎäî ÏïäÏùå.
+			n->AddAdjacentNode(&endNode, path, cost);
 		}
 	}
 
-	tie(path, cost) = aStarAlgorithmOnNodeGraph(gameMap, &startNode, &endNode);
+	vector<Node*> nodePath;
+	vector<INTPAIR> refinedPath;
+	tie(nodePath, cost) = aStarAlgorithmOnNodeGraph(gameMap, &startNode, &endNode);
 
-	// (3) start_node¥¬ entrance node¿« ¿ÃøÙ¿∏∑Œ start_node∏¶ √ﬂ∞°«œ¡ˆ¥¬
-	// æ æ“¿∏π«∑Œ √≥∏Æ æ»«ÿµµ µ . π›∏È end_node¥¬ æ¯æ÷ ¡‡æﬂ«‘.
+	if (!path.empty()) {
+		clock_t t3 = clock();
+		refinedPath = RefinePath(gameMap, &startNode, &endNode, nodePath);
+		clock_t t4 = clock();
+		double elapsed_time = (t4 - t3) / (double)CLOCKS_PER_SEC;
+		std::cout << "refine based on distance: " << elapsed_time << " seconds" << std::endl;
+	}
+
+	// (3) start_nodeÎäî entrance nodeÏùò Ïù¥ÏõÉÏúºÎ°ú start_nodeÎ•º Ï∂îÍ∞ÄÌïòÏßÄÎäî
+	// ÏïäÏïòÏúºÎØÄÎ°ú Ï≤òÎ¶¨ ÏïàÌï¥ÎèÑ Îê®. Î∞òÎ©¥ end_nodeÎäî ÏóÜÏï† Ï§òÏïºÌï®.
 
 	for (Node*& n : endCluster.nodes) {
-		n->neighbors.erase(&endNode); //¡§»Æ«œ¡ˆ æ ¿∫ π¯ø™ ¿Ø¿«
+		n->neighbors.erase(&endNode); //Ï†ïÌôïÌïòÏßÄ ÏïäÏùÄ Î≤àÏó≠ Ïú†Ïùò
 	}
 
 	auto t2 = chrono::high_resolution_clock::now();
 	std::cout << "Path found at: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl;
-	return path;
+	return refinedPath;
 }
 
-vector<INTPAIR> HierarchicalPathfinder::findCompletePath(ObTileMap& gameMap, Vector2 start, Vector2 end)
+vector<INTPAIR> HierarchicalPathfinder::FindCompletePath(ObTileMap& gameMap, Vector2 start, Vector2 end)
 {
 	int cluster_width = CLUSTER_SCALE;
 	int cluster_height = CLUSTER_SCALE;
@@ -342,7 +296,7 @@ vector<INTPAIR> HierarchicalPathfinder::findCompletePath(ObTileMap& gameMap, Vec
 	int end_walk_tile_x = (int)end.x / m;
 	int end_walk_tile_y = (int)end.y / m;
 
-	vector<INTPAIR> path = findPathInWalkTileGrid(gameMap, start_walk_tile_x, start_walk_tile_y, end_walk_tile_x, end_walk_tile_y);
+	vector<INTPAIR> path = FindPathInWalkTileGrid(gameMap, start_walk_tile_x, start_walk_tile_y, end_walk_tile_x, end_walk_tile_y);
 
 	if (path.empty()) {
 		return std::vector<std::pair<int, int>>();

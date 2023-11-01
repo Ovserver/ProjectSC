@@ -1,6 +1,6 @@
 #include "framework.h"
 
-int PathFinder::approximateDistXY(int x1, int y1, int x2, int y2)
+int PathFinder::ApproximateDistXY(int x1, int y1, int x2, int y2)
 {
 	int dx = abs(x1 - x2);
 	int dy = abs(y1 - y2);
@@ -9,7 +9,7 @@ int PathFinder::approximateDistXY(int x1, int y1, int x2, int y2)
 	return e1 * 10 + e2 * 14;
 }
 
-tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y)
+tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const vector<vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y)
 {
 	if (start_x == end_x && start_y == end_y)
 	{
@@ -21,19 +21,19 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 		cout << "not walkable terrain\n";
 		return { vector<INTPAIR>(), -1 };
 	}
-	std::vector<int> direction_x = { 0, 1, 1, 1, 0, -1, -1, -1 };
-	std::vector<int> direction_y = { 1, 1, 0, -1, -1, -1, 0, 1 };
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	vector<int> direction_x = { 0, 1, 1, 1, 0, -1, -1, -1 };
+	vector<int> direction_y = { 1, 1, 0, -1, -1, -1, 0, 1 };
+	chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
 
 	int grid_width = walkability.size();
 	int grid_height = walkability[0].size();
 
-	std::vector<std::vector<int>> from_start_distance_map(grid_width, std::vector<int>(grid_height, 100000));
-	std::vector<std::vector<int>> direction_map(grid_width, std::vector<int>(grid_height, 8));
+	vector<vector<int>> from_start_distance_map(grid_width, vector<int>(grid_height, 100000));
+	vector<vector<int>> direction_map(grid_width, vector<int>(grid_height, 8));
 
-	std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> open_nodes;
+	priority_queue<INTPAIR, vector<INTPAIR>, greater<INTPAIR>> open_nodes;
 
-	int start_end_dist = approximateDistXY(start_x, start_y, end_x, end_y);
+	int start_end_dist = ApproximateDistXY(start_x, start_y, end_x, end_y);
 	open_nodes.push({ start_end_dist, start_x * grid_height + start_y });
 	from_start_distance_map[start_x][start_y] = 0;
 
@@ -61,9 +61,9 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 				current_direction = next_direction;
 			}
 
-			auto t2 = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-			std::cout << "Path found in " << duration.count() << " microseconds" << std::endl;
+			auto t2 = chrono::high_resolution_clock::now();
+			auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1);
+			cout << "Path found in " << duration.count() << " microseconds" << endl;
 			return make_tuple(path, from_start_dist);
 		}
 
@@ -88,7 +88,7 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 				}
 			}
 
-			int from_end_dist = approximateDistXY(nx, ny, end_x, end_y);
+			int from_end_dist = ApproximateDistXY(nx, ny, end_x, end_y);
 			int from_start_dist_new = from_start_dist + distance;
 
 			if (from_start_dist_new < from_start_distance_map[nx][ny]) {
@@ -98,11 +98,10 @@ tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const std::vector<std::vec
 			}
 		}
 	}
-	auto t2 = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
-	std::cout << "No path found in " << duration.count() << " microseconds" << std::endl;
+	auto t2 = chrono::high_resolution_clock::now();
+	auto duration = chrono::duration_cast<chrono::microseconds>(t2 - t1);
+	cout << "No path found in " << duration.count() << " microseconds" << endl;
 	return make_tuple(vector<INTPAIR>(), -1);
-
 }
 
 Node::Node(int _x, int _y, Cluster* _cluster)
@@ -124,7 +123,7 @@ Node* Cluster::addNode(int x, int y)
 	return nodes.back();
 }
 
-void Cluster::findInterPathOfAllNodes()
+void Cluster::FindInterPathOfAllNodes()
 {
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		Node* startNode = nodes[i];
@@ -132,12 +131,9 @@ void Cluster::findInterPathOfAllNodes()
 			Node* endNode = nodes[j];
 			vector<INTPAIR> path;
 			int cost;
-			tie(path, cost) = findInterPath(startNode->x, startNode->y, endNode->x, endNode->y);
+			tie(path, cost) = FindInterPath(startNode->x, startNode->y, endNode->x, endNode->y);
 			if (cost != -1) {
-				startNode->addAdjacentNode(endNode, path, cost);
-
-				//path 거꾸로 해서 end_node에 start_node를 이웃으로 추가.
-
+				startNode->AddAdjacentNode(endNode, path, cost);
 				tie(path, cost) = findInterPath(endNode->x, endNode->y, startNode->x, startNode->y);
 				endNode->addAdjacentNode(startNode, path, cost);
 			}
@@ -145,14 +141,14 @@ void Cluster::findInterPathOfAllNodes()
 	}
 }
 
-tuple<vector<INTPAIR>, int> Cluster::findInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY)
+tuple<vector<INTPAIR>, int> Cluster::FindInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY)
 {
 	int x_offset = grid_x * CLUSTER_SCALE;
 	int y_offset = grid_y * CLUSTER_SCALE;
 
 	if (is_free) {
 		return make_tuple(vector<INTPAIR> { { worldEndX, worldEndY }},
-			PathFinder::approximateDistXY(worldStartX, worldStartY, worldEndX, worldEndY));
+			PathFinder::ApproximateDistXY(worldStartX, worldStartY, worldEndX, worldEndY));
 	}
 
 	int local_start_x = worldStartX - x_offset;

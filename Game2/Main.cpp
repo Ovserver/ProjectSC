@@ -21,9 +21,11 @@ void Main::Init()
 	map.ClusterResize();
 
 	//init pathfinding
-	PFINDER->initializeCluster(map);
-	PFINDER->createEntranceNodes(map);
-	PFINDER->calcInterPath(map);
+	PFINDER->InitializeCluster(map);
+	PFINDER->CreateEntranceNodes(map);
+	PFINDER->CalcInterPath(map);
+
+	Unit::GameMap = &map;
 	for (size_t i = 0; i < map.cluster.size(); i++)
 	{
 		for (size_t j = 0; j < map.cluster[i].size(); j++)
@@ -122,8 +124,19 @@ void Main::Update()
 		ShowCursor(showCursor = !showCursor);
 	if (INPUT->KeyDown(VK_F3))
 		showTileMap = !showTileMap;
-	if (INPUT->KeyDown(VK_F4))
-		app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
+	if (INPUT->KeyPress(VK_F4))
+	{
+		if(INPUT->KeyDown('1'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
+		if (INPUT->KeyDown('2'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 16, TILESCALE * 16) * IMGSCALE);
+		if (INPUT->KeyDown('3'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 16, TILESCALE * 112) * IMGSCALE);
+		if (INPUT->KeyDown('4'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 112, TILESCALE * 16) * IMGSCALE);
+		if (INPUT->KeyDown('5'))
+			app.maincam->SetWorldPos(Vector2(TILESCALE * 112, TILESCALE * 112) * IMGSCALE);
+	}
 	if (INPUT->KeyDown(VK_F5))
 	{
 		Unit* temp = new Unit();
@@ -145,7 +158,7 @@ void Main::Update()
 	if (INPUT->KeyDown(VK_F8))
 	{
 		Vector2 ttmp = INPUT->GetWorldMousePos();
-		pathway = PFINDER->findCompletePath(map, startPos, ttmp);
+		pathway = PFINDER->FindCompletePath(map, startPos, ttmp);
 	}
 	if (INPUT->KeyPress(VK_LEFT))
 	{
@@ -393,6 +406,9 @@ void Main::Render()
 		TestStar.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
 		TestStar.Render();
 	}
+	TestBox.color = Color(0, 1, 0);
+	TestBox.SetWorldPos(INPUT->GetWorldMousePos());
+	TestBox.Render();
 }
 
 void Main::ResizeScreen()
