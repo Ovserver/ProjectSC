@@ -102,6 +102,10 @@ void Main::Init()
 	TestBox.SetScale().x = 10.0f;
 	TestBox.SetScale().y = 10.0f;
 
+	TestStar.SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
+	TestStar.SetScale().x = 10.0f;
+	TestStar.SetScale().y = 10.0f;
+
 	SSYSTEM->TileMap = &map;
 	SSYSTEM->UICam = &cam2;
 }
@@ -291,6 +295,7 @@ void Main::LateUpdate()
 	//ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
 	//ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
 	//ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
+	ImGui::Text("WorldMousePos\n%f %f", INPUT->GetWorldMousePos().x, INPUT->GetWorldMousePos().y);
 	//ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
 	//ImGui::Text("Unit Pool : %d", SSYSTEM->UnitPool.size());
 	//ImGui::Text("Unit Pool Selected : %d", SSYSTEM->UnitPoolSelect.size());
@@ -392,14 +397,14 @@ void Main::Render()
 			}
 		}
 	}
-	TestBox.color = Color(0, 1, 0);
-	TestBox.SetWorldPos(startPos);
-	TestBox.Render();
+	TestStar.color = Color(0, 1, 0);
+	TestStar.SetWorldPos(startPos);
+	TestStar.Render();
 	for (size_t i = 0; i < pathway.size(); i++)
 	{
-		TestBox.color = Color((float)i / (float)(pathway.size()), (float)i / (float)(pathway.size()), 0);
-		TestBox.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
-		TestBox.Render();
+		TestStar.color = Color((float)i / (float)(pathway.size() - 1), 1, 0);
+		TestStar.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
+		TestStar.Render();
 	}
 	TestBox.color = Color(0, 1, 0);
 	TestBox.SetWorldPos(INPUT->GetWorldMousePos());

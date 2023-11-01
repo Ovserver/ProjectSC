@@ -34,4 +34,5 @@ private:
 	Vector2	startDragPos;
 	ObImage	mapImage;
 	ObRect	TestBox;
+	ObStar	TestStar;
 };
