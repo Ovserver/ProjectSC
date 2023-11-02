@@ -14,7 +14,7 @@ public:
 	};
 	// 노드 그래프를 이용한 A* 알고리즘.
 	// PathFinder의 A* 알고리즘과 약간 다름.
-	tuple<vector<Node*>, int> aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode);
+	tuple<vector<INTPAIR>, int> aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode);
 	vector<INTPAIR> FindPathInWalkTileGrid(ObTileMap& gameMap, int startWalkTileX, int startWalkTileY, int endWalkTileX, int endWalkTileY);
 	vector<INTPAIR> FindCompletePath(ObTileMap& gameMap, Vector2 start, Vector2 end);
 	vector<INTPAIR> RefinePath(ObTileMap& gameMap, Node* startNode, Node* endNode, vector<Node*> nodePath)

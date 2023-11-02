@@ -132,7 +132,7 @@ void HierarchicalPathfinder::CalcInterPath(ObTileMap& gameMap)
 	cout << "inter path calc time: " << (endTime - startTime) << " seconds" << std::endl;
 }
 
-tuple<vector<Node*>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
+tuple<vector<INTPAIR>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTileMap& gameMap, Node* startNode, Node* endNode)
 {
 	priority_queue<pair<int, Node*>, vector<pair<int, Node*>>, CompareNodes> openNodes;
 	unordered_map<Node*, int> fromStartDistMap;
@@ -154,13 +154,17 @@ tuple<vector<Node*>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTi
 
 		//목표지점 도달 시
 		if (curNode == endNode) {
-			vector<Node*> path;
+			vector<INTPAIR> path;
 			Node* nNode = endNode;
 			while (nNode != startNode) {
-				path.push_back(nNode);
 				Node* parent = parentMap[nNode];
-				reverse(parent->neighbors[nNode].first.begin(), parent->neighbors[nNode].first.end());
+				vector<INTPAIR> toParentPath = parent->neighbors[nNode].first;
+				path.insert(path.end(), toParentPath.begin(), toParentPath.end());
 				nNode = parent;
+				//path.push_back(nNode);
+				//Node* parent = parentMap[nNode];
+				////reverse(parent->neighbors[nNode].first.begin(), parent->neighbors[nNode].first.end());
+				//nNode = parent;
 			}
 			return { path, fromStartDist };
 		}
@@ -179,7 +183,7 @@ tuple<vector<Node*>, int> HierarchicalPathfinder::aStarAlgorithmOnNodeGraph(ObTi
 			}
 		}
 	}
-	return { vector<Node*>(), -1 };
+	return { vector<INTPAIR>(), -1 };
 }
 
 vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMap, int startWalkTileX, int startWalkTileY, int endWalkTileX, int endWalkTileY)
@@ -241,15 +245,15 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 
 	vector<Node*> nodePath;
 	vector<INTPAIR> refinedPath;
-	tie(nodePath, cost) = aStarAlgorithmOnNodeGraph(gameMap, &startNode, &endNode);
+	tie(path, cost) = aStarAlgorithmOnNodeGraph(gameMap, &startNode, &endNode);
 
-	if (!path.empty()) {
+	/*if (!path.empty()) {
 		clock_t t3 = clock();
 		refinedPath = RefinePath(gameMap, &startNode, &endNode, nodePath);
 		clock_t t4 = clock();
 		double elapsed_time = (t4 - t3) / (double)CLOCKS_PER_SEC;
 		std::cout << "refine based on distance: " << elapsed_time << " seconds" << std::endl;
-	}
+	}*/
 
 	// (3) start_node는 entrance node의 이웃으로 start_node를 추가하지는
 	// 않았으므로 처리 안해도 됨. 반면 end_node는 없애 줘야함.
@@ -260,7 +264,7 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 
 	auto t2 = chrono::high_resolution_clock::now();
 	std::cout << "Path found at: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl;
-	return refinedPath;
+	return path;
 }
 
 vector<INTPAIR> HierarchicalPathfinder::FindCompletePath(ObTileMap& gameMap, Vector2 start, Vector2 end)
