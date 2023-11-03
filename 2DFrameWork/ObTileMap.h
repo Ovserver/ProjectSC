@@ -64,7 +64,7 @@ public:
 	vector<vector<bool>>	walkableTiles;
 	vector<vector<Cluster*>> cluster;
 public:
-	ObTileMap();
+	ObTileMap(int tileSizeX = 4 * 128, int tileSizeY = 4 * 128, Vector2 tileScale = Vector2(TILESCALE, TILESCALE) * IMGSCALE / 4.0f);
 	virtual ~ObTileMap();
 	void    Render(class Camera* cam = app.maincam) override;
 	//                  타일위치       이미지좌표  몇번이미지?
@@ -84,6 +84,7 @@ public:
 	//                   타일인덱스
 	int     GetTileState(Int2 TileIdx);
 	int     GetTileState(Vector2 WorldPos);
+	bool	GetTileWalkable(Vector2 WorldPos);	
 	TileCol GetTileCol(Vector2 WorldPos);
 	void    SetTileCol(TileCol setTileCol);
 	bool    SetTileCol(Vector2 WorldPos, TileCol tileCol);

@@ -9,5 +9,6 @@ public:
 	static bool ShowCollider;
 public:
 	static void InitImage(ObImage& image, wstring fName, Vector2 offset = Vector2(0, 0), int xFrame = 1, int yFrame = 1, bool isRender = true);
+	static void InitDynamicMap(ObTileMap* GameMap, ObTileMap* dynamicMap);
 };
 

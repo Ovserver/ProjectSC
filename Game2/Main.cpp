@@ -20,12 +20,19 @@ void Main::Init()
 	map.CreateTileState();
 	map.ClusterResize();
 
+	mapDynamic = new ObTileMap(128, 128, Vector2(TILESCALE, TILESCALE) * IMGSCALE);
+	mapDynamic->Load();
+	mapDynamic->CreateTileState();
+	Utility2::InitDynamicMap(&map, mapDynamic);
+
 	//init pathfinding
 	PFINDER->InitializeCluster(map);
 	PFINDER->CreateEntranceNodes(map);
 	PFINDER->CalcInterPath(map);
 
+	Unit::InitWireframes();
 	Unit::GameMap = &map;
+
 	for (size_t i = 0; i < map.cluster.size(); i++)
 	{
 		for (size_t j = 0; j < map.cluster[i].size(); j++)
@@ -74,7 +81,7 @@ void Main::Init()
 	for (size_t i = 0; i < 8; i++)
 		cursorMoveScreen[i].ChangeAnim(ANIMSTATE::LOOP, FRAME(10));
 
-	Utility2::InitImage(console, L"console/tconsole.png");
+
 	Utility2::InitImage(mapImage, L"maps/map.bmp");
 	mapImage.SetPivot() = OFFSET_LB;
 
@@ -102,6 +109,20 @@ void Main::Init()
 	TestBox.SetScale().x = 10.0f;
 	TestBox.SetScale().y = 10.0f;
 
+	Utility2::InitImage(buildingImage, L"building/cmdCenter_test.png");
+	for (size_t i = 0; i < 4; i++)
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			buildingImageBox[i * 3 + j].SetParentT(buildingImage);
+			buildingImageBox[i * 3 + j].UpdateMatrix();
+			buildingImageBox[i * 3 + j].SetScale().x = 32 * IMGSCALE;
+			buildingImageBox[i * 3 + j].SetScale().y = 32 * IMGSCALE;
+			buildingImageBox[i * 3 + j].SetLocalPos(Vector2(-48 * IMGSCALE + i * 32 * IMGSCALE, 32 * IMGSCALE - j * 32 * IMGSCALE));
+			buildingImageBox[i * 3 + j].color = Color(0, 1, 0, 0.25f);
+		}
+	}
+
 	SSYSTEM->TileMap = &map;
 	SSYSTEM->UICam = &cam2;
 }
@@ -112,8 +133,11 @@ void Main::Release()
 Vector2 startPos;
 vector<INTPAIR> pathway;
 UINT	pNumber = 0;
+Int2	int2tmp;
 void Main::Update()
 {
+
+
 	if (INPUT->KeyDown(VK_F1))
 		Utility2::ShowCollider = !Utility2::ShowCollider;
 	if (INPUT->KeyDown(VK_F2))
@@ -122,7 +146,7 @@ void Main::Update()
 		showTileMap = !showTileMap;
 	if (INPUT->KeyPress(VK_F4))
 	{
-		if(INPUT->KeyDown('1'))
+		if (INPUT->KeyDown('1'))
 			app.maincam->SetWorldPos(Vector2(TILESCALE * 64, TILESCALE * 64) * IMGSCALE);
 		if (INPUT->KeyDown('2'))
 			app.maincam->SetWorldPos(Vector2(TILESCALE * 16, TILESCALE * 16) * IMGSCALE);
@@ -172,6 +196,17 @@ void Main::Update()
 	{
 		app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
 	}
+	if (INPUT->KeyDown('Q'))
+	{
+		if (!BuildingMode)
+			BuildingMode = true;
+	}
+	if (BuildingMode)
+	{
+		buildingImage.UpdateMatrix();
+		mapDynamic->WorldPosToTileIdx(INPUT->GetWorldMousePos(), int2tmp);
+		buildingImage.SetWorldPos(mapDynamic->Tiles[int2tmp.x][int2tmp.y].Pos - Vector2(32, 0));
+	}
 	SSYSTEM->Update();
 }
 float intervalTime = 0;
@@ -179,6 +214,28 @@ bool MoveLeftScreen = false, MoveRightScreen = false, MoveUpScreen = false, Move
 
 void Main::LateUpdate()
 {
+	if (BuildingMode)
+	{
+		if (INPUT->KeyDown(VK_LBUTTON))
+		{
+			bool flag = true;
+			for (size_t i = 0; i < 12; i++)
+			{
+				if (!mapDynamic->GetTileWalkable(buildingImageBox[i].GetWorldPos()))
+				{
+					flag = false; break;
+				}
+			}
+			if (flag)
+			{
+			// create building
+				Unit* buildingTmp = new Unit(UnitType::BUILDING, UnitName::COMMANDCENTER);
+				buildingTmp->SetWorldPos(mapDynamic->Tiles[int2tmp.x][int2tmp.y].Pos + Vector2(32, 0));
+				SSYSTEM->BuildingPool.push_back(buildingTmp);
+				BuildingMode = false;
+			}
+		}
+	}
 	if (INPUT->GetScreenMousePos().y < 690)
 	{
 		if (INPUT->KeyDown(VK_LBUTTON))
@@ -247,7 +304,7 @@ void Main::LateUpdate()
 				MoveRightScreen = false;
 			}
 		}
-		if (INPUT->KeyUp(VK_LBUTTON) && abs(SelectAreaCol.GetScale().x) > 2 && abs(SelectAreaCol.GetScale().y) > 2)
+		if (INPUT->KeyUp(VK_LBUTTON) && abs(SelectAreaCol.GetScale().x) > 0 && abs(SelectAreaCol.GetScale().y) > 0)
 		{
 			SSYSTEM->UnitPoolSelect.clear();
 			for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
@@ -291,7 +348,7 @@ void Main::LateUpdate()
 	//ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
 	//ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);
 	//ImGui::Text("StartDragPos is Screen\n%f %f", startDragPos.x, startDragPos.y);
-	//ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
+	ImGui::Text("ScreenMousePos\n%f %f", INPUT->GetScreenMousePos().x, INPUT->GetScreenMousePos().y);
 	//ImGui::Text("Unit Pool : %d", SSYSTEM->UnitPool.size());
 	//ImGui::Text("Unit Pool Selected : %d", SSYSTEM->UnitPoolSelect.size());
 	//ImGui::Text("TileCol Unit\n");
@@ -310,7 +367,6 @@ void Main::Render()
 	mapImage.Render();
 	if (showTileMap)
 		map.Render();
-	console.Render(&cam2);
 	SSYSTEM->Render();
 	if (INPUT->KeyPress(VK_LBUTTON))
 	{
@@ -404,6 +460,19 @@ void Main::Render()
 	TestBox.color = Color(0, 1, 0);
 	TestBox.SetWorldPos(INPUT->GetWorldMousePos());
 	TestBox.Render();
+
+	if (BuildingMode)
+	{
+		buildingImage.Render();
+		for (size_t i = 0; i < 12; i++)
+		{
+			if (!mapDynamic->GetTileWalkable(buildingImageBox[i].GetWorldPos()))
+				buildingImageBox[i].color = Color(1, 0, 0, 0.25f);
+			else
+				buildingImageBox[i].color = Color(0, 1, 0, 0.25f);
+			buildingImageBox[i].Render();
+		}
+	}
 }
 
 void Main::ResizeScreen()

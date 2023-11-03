@@ -43,12 +43,18 @@ public:
 	UINT			cmdIconsNum;
 	vector<ObImage*> cmdIcons;
 	vector<Vector2> cmdIconsPos;
+	vector<ObImage*>unitWireframe;
+	vector<Vector2> unitWireframePos;
 	ObTileMap*		TileMap;
 	vector<Unit*>	UnitPool;
 	vector<Unit*>	UnitPoolSelect;
 	vector<Unit*>	UnitPoolDelete;
+	vector<Unit*>	BuildingPool;
+	Unit*			BuildingPoolSelect;
 
 	CmdIconPool*	IconPoolTemp;
 	CmdIconPool*	IconPoolTempSelect;
 	CmdIconPool		IconPoolSelect;
+private:
+	ObImage console;
 };

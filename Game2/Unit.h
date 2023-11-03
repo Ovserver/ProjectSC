@@ -1,7 +1,11 @@
 #pragma once
+enum class UnitName
+{
+	UNUSED, ZEALOT, MARINE, COMMANDCENTER
+};
 enum class UnitType
 {
-	UNUSED, UNIT, NEUTRAL, RESOURCE, EFFECT
+	UNUSED, UNIT, BUILDING, NEUTRAL, RESOURCE, EFFECT
 };
 enum class UnitCmd
 {
@@ -14,7 +18,8 @@ enum class UnitState
 class Unit
 {
 public:
-	Unit();
+	static void InitWireframes();
+	Unit(UnitType _unitType = UnitType::UNIT, UnitName _unitName = UnitName::ZEALOT);
 	void Update();
 	void Render();
 	int  lookDir(Vector2 dir);
@@ -34,6 +39,7 @@ public:
 	void Stop2();
 public:
 	static ObTileMap* GameMap;
+	static map<UnitName, ObImage*> UnitWireframe;
 	bool			pathfinding = false;
 	float			attackRange;
 	float			sightRange;
@@ -46,6 +52,7 @@ public:
 	vector<INTPAIR>	pathWay2;
 	Unit*			targetCmdUnit;
 	CmdIconPool		IconPool;
+	UnitName		unitName;
 protected:
 	int				dirFrameX[9];
 	float			moveSpeed;

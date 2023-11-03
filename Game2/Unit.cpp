@@ -4,9 +4,20 @@
 #include "Unit.h"
 
 ObTileMap* Unit::GameMap = nullptr;
-
-Unit::Unit()
+map<UnitName, ObImage*> Unit::UnitWireframe;
+void Unit::InitWireframes()
 {
+	UnitWireframe[UnitName::UNUSED] = new ObImage();
+	Utility2::InitImage(*UnitWireframe[UnitName::UNUSED], L"unit/wireframe/wireUnused.png", Vector2());
+	UnitWireframe[UnitName::ZEALOT] = new ObImage();
+	Utility2::InitImage(*UnitWireframe[UnitName::ZEALOT], L"unit/wireframe/wireZealot.png", Vector2());
+}
+Unit::Unit(UnitType _unitType, UnitName _unitName)
+{	
+	unitName = _unitName; 
+	unitType = _unitType;
+	unitState = UnitState::IDLE;
+	
 	maxHp = 100;
 	hp = maxHp;
 	atkDamage = 20;
@@ -44,8 +55,7 @@ Unit::Unit()
 	dirFrameX[A1575] = 7;
 	dirFrameX[A1800] = 8;
 
-	unitType = UnitType::UNUSED;
-	unitState = UnitState::IDLE;
+	
 	col.SetScale() = spriteMove.GetScale();
 	moveSpeed = 200;
 
@@ -102,28 +112,6 @@ void Unit::Update()
 			{
 				InitPath2(pathWay2);
 			}
-			//vector<Tile*> temp;
-			//Vector2	commandPostemp;
-
-			//if (unitCmd == UnitCmd::ATTACK)
-			//{
-			//	if (targetCmdUnit)
-			//		commandPostemp = targetCmdUnit->GetWorldPos();
-			//	else
-			//		commandPostemp = cmdPos;
-			//}
-			//else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
-			//// pathfinding을 특정 이벤트 발생 시 갱신하도록 함수화 하여 수정하기
-			//SSYSTEM->UpdateTileCol();
-			//if (SSYSTEM->TileMap->PathFinding(col.GetWorldPos(), commandPostemp, pathWay))
-			//{
-			//	InitPath(pathWay);
-			//}
-			//else
-			//{
-			//	Stop();
-			//	cout << "pathClear\n";
-			//}
 		}
 	}
 	if (pathfinding)
@@ -147,23 +135,6 @@ void Unit::Update()
 				col.SetWorldPos(Vector2(pathWay2.back().first, pathWay2.back().second));
 				pathWay2.pop_back();
 			}
-			/*if (pathWay.empty())
-			{
-				Stop();
-				return;
-			}
-			moveDir = pathWay.back()->Pos - col.GetWorldPos();
-			if (moveDir.Length() > moveSpeed * DELTA)
-			{
-				moveDir.Normalize();
-				col.MoveWorldPos(moveDir * moveSpeed * DELTA);
-				lookDir(moveDir);
-			}
-			else
-			{
-				col.SetWorldPos(pathWay.back()->Pos);
-				pathWay.pop_back();
-			}*/
 		}
 		else if (unitState == UnitState::IDLE)
 		{
@@ -272,7 +243,6 @@ void Unit::Render()
 			spriteIdle.SetRotation().y = 180 * ToRadian;
 			spriteMove.SetRotation().y = 180 * ToRadian;
 			spriteAttack.SetRotation().y = 180 * ToRadian;
-
 		}
 		else
 		{

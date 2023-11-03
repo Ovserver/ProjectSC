@@ -50,7 +50,7 @@ void Main::Release()
 }
 bool showCursor = true;
 void Main::Update()
-{
+{	
 	if (INPUT->KeyDown(VK_F2))
 		ShowCursor(showCursor = !showCursor);
 	ImGui::Begin("TileMap Editor");

@@ -1,13 +1,13 @@
 #include "framework.h"
 
-ObTileMap::ObTileMap()
+ObTileMap::ObTileMap(int tileSizeX, int tileSizeY, Vector2 tileScale)
 {
 	//타일 가로세로 갯수
-	tileSize.x = 4 * 128;
-	tileSize.y = 4 * 128;
+	tileSize.x = tileSizeX;
+	tileSize.y = tileSizeY;
 
 	//타일 한칸의 크기
-	scale = Vector2(TILESCALE, TILESCALE) * IMGSCALE / 4.0f;
+	scale = tileScale;
 	tileImages[0] = new ObImage();
 	tileImages[0]->LoadFile(L"Tile.png");
 	tileImages[0]->maxFrame = Int2(8, 6);
@@ -230,6 +230,16 @@ int ObTileMap::GetTileState(Vector2 WorldPos)
 		return GetTileState(plIdx);
 	}
 	return TILE_SIZE;
+}
+
+bool ObTileMap::GetTileWalkable(Vector2 WorldPos)
+{
+	Int2 plIdx;
+	if (WorldPosToTileIdx(WorldPos, plIdx))
+	{
+		return walkableTiles[plIdx.x][plIdx.y];
+	}
+	return false;
 }
 
 TileCol ObTileMap::GetTileCol(Vector2 WorldPos)

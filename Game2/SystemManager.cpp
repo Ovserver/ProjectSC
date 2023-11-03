@@ -8,6 +8,8 @@ SystemManager::SystemManager()
 	TileMap = nullptr;
 	UICam = nullptr;
 
+	Utility2::InitImage(console, L"console/tconsole.png");
+
 	Utility2::InitImage(IMOVE, L"icons/cmdiconsMove.png"); IMOVE.collider = COLLIDER::RECT;
 	Utility2::InitImage(ISTOP, L"icons/cmdiconsStop.png"); ISTOP.collider = COLLIDER::RECT;
 	Utility2::InitImage(IATTACK, L"icons/cmdiconsAttack.png"); IATTACK.collider = COLLIDER::RECT;
@@ -37,6 +39,16 @@ SystemManager::SystemManager()
 	}
 	SelectMode = false;
 	Utility2::InitImage(TestBox, L"Tile2.png");
+	for (size_t i = 0; i < 6; i++)
+	{
+		for (size_t j = 0; j < 2; j++)
+		{
+			unitWireframePos.push_back(Vector2(
+				-app.GetHalfWidth() + (380 + i * 75),
+				app.GetHalfHeight() - (828 + j * 87)));
+			unitWireframe.push_back(nullptr);
+		}
+	}
 }
 
 void SystemManager::Update()
@@ -57,7 +69,7 @@ void SystemManager::Update()
 				{
 					if (IconPoolTemp->iconList[i] == CmdIconList::STOP)
 						CmdExecute(CmdIconList::STOP);
-					else if(IconPoolTemp->iconList[i] == CmdIconList::HOLD)
+					else if (IconPoolTemp->iconList[i] == CmdIconList::HOLD)
 						CmdExecute(CmdIconList::HOLD);
 					else
 					{
@@ -85,6 +97,11 @@ void SystemManager::Update()
 
 void SystemManager::Render()
 {
+	console.Render(UICam);
+	for (size_t i = 0; i < BuildingPool.size(); i++)
+	{
+		BuildingPool[i]->Render();
+	}
 	for (size_t i = 0; i < UnitPool.size(); i++)
 	{
 		UnitPool[i]->col.color = Color(1, 1, 1);
@@ -106,6 +123,17 @@ void SystemManager::Render()
 		if (cmdIcons[i])
 			cmdIcons[i]->Render(UICam);
 	}
+	if (UnitPoolSelect.size() > 0)
+	{
+		for (size_t i = 0; i < unitWireframe.size(); i++)
+		{
+			if (unitWireframe[i])
+			{
+				unitWireframe[i]->SetWorldPos(unitWireframePos[i]);
+				unitWireframe[i]->Render(UICam);
+			}
+		}
+	}
 }
 
 void SystemManager::UpdateTileCol()
@@ -121,12 +149,20 @@ void SystemManager::UpdateCmdIcons()
 {
 	SelectMode = false;
 	IconPoolTemp = nullptr;
+	for (size_t i = 0; i < unitWireframe.size(); i++)
+	{
+		unitWireframe[i] = nullptr;
+	}
 	for (size_t i = 0; i < cmdIcons.size(); i++)
 	{
 		cmdIcons[i] = nullptr;
 	}
 	if (!UnitPoolSelect.empty())
 	{
+		for (size_t i = 0; i < UnitPoolSelect.size(); i++)
+		{
+			unitWireframe[i] = Unit::UnitWireframe[UnitPoolSelect[i]->unitName];
+		}
 		IconPoolTemp = &UnitPoolSelect.front()->IconPool;
 		for (size_t i = 0; i < NUM_CMDICON; i++)
 		{
