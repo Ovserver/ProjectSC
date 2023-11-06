@@ -5,7 +5,8 @@
 
 SystemManager::SystemManager()
 {
-	TileMap = nullptr;
+	GameMap = nullptr;
+	DynamicGameMap = nullptr;
 	UICam = nullptr;
 
 	Utility2::InitImage(console, L"console/tconsole.png");
@@ -138,10 +139,10 @@ void SystemManager::Render()
 
 void SystemManager::UpdateTileCol()
 {
-	TileMap->SetTileCol(TileCol::NONE);
+	GameMap->SetTileCol(TileCol::NONE);
 	for (size_t i = 0; i < UnitPool.size(); i++)
 	{
-		TileMap->SetTileCol(UnitPool[i]->GetWorldPos(), TileCol::UNIT);
+		GameMap->SetTileCol(UnitPool[i]->GetWorldPos(), TileCol::UNIT);
 	}
 }
 
@@ -363,7 +364,33 @@ void SystemManager::DeleteUnitPool()
 	}
 	if (flag)
 	{
+		UnitPoolDelete.back()->Release();
 		delete UnitPoolDelete.back();
 		UnitPoolDelete.pop_back();
 	}
+}
+
+bool SystemManager::CreateBuilding(UnitType unitType, UnitName unitName, ObRect* gridArray, UINT gridX, UINT gridY)
+{
+	for (size_t i = 0; i < 12; i++)
+	{
+		if (!DynamicGameMap->GetTileWalkable(gridArray[i].GetWorldPos()))
+		{
+			return false;
+		}
+	}
+	// create building
+	Int2 int2tmp;
+	DynamicGameMap->WorldPosToTileIdx(INPUT->GetWorldMousePos(), int2tmp);
+	Unit* temp = new Unit(unitType, unitName);
+	temp->SetWorldPos(DynamicGameMap->Tiles[int2tmp.x][int2tmp.y].Pos - Vector2(32, 0));
+	for (size_t i = 0; i < gridX * gridY; i++)
+	{
+		DynamicGameMap->WorldPosToTileIdx(gridArray[i].GetWorldPos(), int2tmp);
+		DynamicGameMap->walkableTiles[int2tmp.x][int2tmp.y] = false;
+		temp->buildingColGrid.push_back(int2tmp);
+	}
+	GameMap->UpdateBuildingState(DynamicGameMap, true);
+	UnitPool.push_back(temp);
+	return true;
 }

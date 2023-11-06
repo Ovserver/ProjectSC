@@ -19,11 +19,17 @@ void Main::Init()
 	map.Load();
 	map.CreateTileState();
 	map.ClusterResize();
+	for (size_t i = 0; i < map.tileSize.x / 4; i++)
+	{
+		map.buildingTiles.push_back(vector<bool>());
+		for (size_t j = 0; j < map.tileSize.y / 4; j++)
+			map.buildingTiles[i].push_back(false);
+	}
 
-	mapDynamic = new ObTileMap(128, 128, Vector2(TILESCALE, TILESCALE) * IMGSCALE);
-	mapDynamic->Load();
-	mapDynamic->CreateTileState();
-	Utility2::InitDynamicMap(&map, mapDynamic);
+	dynamicMap = new ObTileMap(128, 128, Vector2(TILESCALE, TILESCALE) * IMGSCALE);
+	dynamicMap->Load();
+	dynamicMap->CreateTileState();
+	Utility2::InitDynamicMap(&map, dynamicMap);
 
 	//init pathfinding
 	PFINDER->InitializeCluster(map);
@@ -123,7 +129,8 @@ void Main::Init()
 		}
 	}
 
-	SSYSTEM->TileMap = &map;
+	SSYSTEM->GameMap = &map;
+	SSYSTEM->DynamicGameMap = dynamicMap;
 	SSYSTEM->UICam = &cam2;
 }
 
@@ -204,8 +211,8 @@ void Main::Update()
 	if (BuildingMode)
 	{
 		buildingImage.UpdateMatrix();
-		mapDynamic->WorldPosToTileIdx(INPUT->GetWorldMousePos(), int2tmp);
-		buildingImage.SetWorldPos(mapDynamic->Tiles[int2tmp.x][int2tmp.y].Pos - Vector2(32, 0));
+		dynamicMap->WorldPosToTileIdx(INPUT->GetWorldMousePos(), int2tmp);
+		buildingImage.SetWorldPos(dynamicMap->Tiles[int2tmp.x][int2tmp.y].Pos - Vector2(32, 0));
 	}
 	SSYSTEM->Update();
 }
@@ -218,22 +225,9 @@ void Main::LateUpdate()
 	{
 		if (INPUT->KeyDown(VK_LBUTTON))
 		{
-			bool flag = true;
-			for (size_t i = 0; i < 12; i++)
-			{
-				if (!mapDynamic->GetTileWalkable(buildingImageBox[i].GetWorldPos()))
-				{
-					flag = false; break;
-				}
-			}
-			if (flag)
-			{
-			// create building
-				Unit* buildingTmp = new Unit(UnitType::BUILDING, UnitName::COMMANDCENTER);
-				buildingTmp->SetWorldPos(mapDynamic->Tiles[int2tmp.x][int2tmp.y].Pos + Vector2(32, 0));
-				SSYSTEM->BuildingPool.push_back(buildingTmp);
+			if (SSYSTEM->CreateBuilding(UnitType::BUILDING, UnitName::COMMANDCENTER,
+				buildingImageBox, 4, 3))
 				BuildingMode = false;
-			}
 		}
 	}
 	if (INPUT->GetScreenMousePos().y < 690)
@@ -466,7 +460,7 @@ void Main::Render()
 		buildingImage.Render();
 		for (size_t i = 0; i < 12; i++)
 		{
-			if (!mapDynamic->GetTileWalkable(buildingImageBox[i].GetWorldPos()))
+			if (!dynamicMap->GetTileWalkable(buildingImageBox[i].GetWorldPos()))
 				buildingImageBox[i].color = Color(1, 0, 0, 0.25f);
 			else
 				buildingImageBox[i].color = Color(0, 1, 0, 0.25f);

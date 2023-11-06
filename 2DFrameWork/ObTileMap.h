@@ -62,6 +62,7 @@ public:
 	string                  file;    //저장될 이름
 	vector<vector<Tile>>    Tiles;
 	vector<vector<bool>>	walkableTiles;
+	vector<vector<bool>>	buildingTiles;
 	vector<vector<Cluster*>> cluster;
 public:
 	ObTileMap(int tileSizeX = 4 * 128, int tileSizeY = 4 * 128, Vector2 tileScale = Vector2(TILESCALE, TILESCALE) * IMGSCALE / 4.0f);
@@ -88,9 +89,13 @@ public:
 	TileCol GetTileCol(Vector2 WorldPos);
 	void    SetTileCol(TileCol setTileCol);
 	bool    SetTileCol(Vector2 WorldPos, TileCol tileCol);
+	// 건물 건설 후, 충돌체 설정 후처리
+	void	UpdateBuildingState(ObTileMap* dynamicMap, bool isActiveCol);
 
 	bool    PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way);
 
 	bool    PathFinding(Vector2 sour, Vector2 dest, OUT vector<Tile*>& way);
+private:
+	void	SetBuildingState(UINT x, UINT y, bool isActiveCol);
 };
 

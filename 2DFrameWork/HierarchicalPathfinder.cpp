@@ -206,8 +206,8 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 
 		// 경로 존재하면 바로 리턴. 없을 경우 더 복잡한 탐색을 해야함.
 		if (cost != -1) {
-			auto t2 = std::chrono::high_resolution_clock::now();
-			std::cout << "At same cluster! Path found at " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl;
+			auto t2 = chrono::high_resolution_clock::now();
+			cout << "At same cluster! Path found at " << chrono::duration_cast<chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl;
 			return path;
 		}
 	}
@@ -243,10 +243,14 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 		}
 	}
 
-	vector<Node*> nodePath;
 	vector<INTPAIR> refinedPath;
 	tie(path, cost) = aStarAlgorithmOnNodeGraph(gameMap, &startNode, &endNode);
 
+	// 일정거리 이하일 경우, 일반 a* 사용한 경로로 교체
+	if (cost != -1 && cost < 700)
+	{
+		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY);
+	}
 	/*if (!path.empty()) {
 		clock_t t3 = clock();
 		refinedPath = RefinePath(gameMap, &startNode, &endNode, nodePath);

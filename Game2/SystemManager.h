@@ -28,6 +28,7 @@ public:
 	void CmdExecute();
 	void CmdExecute(CmdIconList command);
 	void DeleteUnitPool();
+	bool CreateBuilding(UnitType unitType, UnitName unitName, ObRect* gridArray, UINT gridX, UINT gridY);
 public:
 	bool	SelectMode;
 	Camera* UICam;
@@ -45,7 +46,8 @@ public:
 	vector<Vector2> cmdIconsPos;
 	vector<ObImage*>unitWireframe;
 	vector<Vector2> unitWireframePos;
-	ObTileMap*		TileMap;
+	ObTileMap*		GameMap;
+	ObTileMap*		DynamicGameMap;
 	vector<Unit*>	UnitPool;
 	vector<Unit*>	UnitPoolSelect;
 	vector<Unit*>	UnitPoolDelete;

@@ -20,7 +20,7 @@ bool DynamicMapWalkable(ObTileMap* gameMap, int x, int y)
 	{
 		for (size_t m = 0; m < 4; m++)
 		{
-			if (!gameMap->walkableTiles[x * 4 + n][y * 4 + m])
+			if (gameMap->Tiles[x * 4 + n][y * 4 + m].state)
 				return false;
 		}
 	}
@@ -30,11 +30,9 @@ bool DynamicMapWalkable(ObTileMap* gameMap, int x, int y)
 void Utility2::InitDynamicMap(ObTileMap* GameMap, ObTileMap* dynamicMap)
 {
 	for (size_t i = 0; i < dynamicMap->tileSize.x; i++)
-	{
-		dynamicMap->walkableTiles.push_back(vector<bool>());
+	{		
 		for (size_t j = 0; j < dynamicMap->tileSize.y; j++)
-		{
-			dynamicMap->walkableTiles[i].push_back(true);
+		{			
 			dynamicMap->walkableTiles[i][j] = DynamicMapWalkable(GameMap, i, j);
 		}
 	}

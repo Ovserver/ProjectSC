@@ -1,25 +1,12 @@
 #pragma once
-enum class UnitName
-{
-	UNUSED, ZEALOT, MARINE, COMMANDCENTER
-};
-enum class UnitType
-{
-	UNUSED, UNIT, BUILDING, NEUTRAL, RESOURCE, EFFECT
-};
-enum class UnitCmd
-{
-	NONE, STOP, MOVE, ATTACK, PATROL, HOLD, GATHER
-};
-enum class UnitState
-{
-	IDLE, MOVE, ATTACK, GATHER
-};
+
 class Unit
 {
 public:
 	static void InitWireframes();
 	Unit(UnitType _unitType = UnitType::UNIT, UnitName _unitName = UnitName::ZEALOT);
+	~Unit();
+	void Release();
 	void Update();
 	void Render();
 	int  lookDir(Vector2 dir);
@@ -53,6 +40,7 @@ public:
 	Unit*			targetCmdUnit;
 	CmdIconPool		IconPool;
 	UnitName		unitName;
+	vector<Int2>	buildingColGrid;
 protected:
 	int				dirFrameX[9];
 	float			moveSpeed;
@@ -67,6 +55,8 @@ protected:
 	ObImage			spriteMove;
 	ObImage			spriteAttack;
 	ObImage			spriteDeath;
+private:
+	void InitUnitImage();
 private:
 	float			deathTime;
 	int				hp;

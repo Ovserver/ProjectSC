@@ -273,6 +273,43 @@ bool ObTileMap::SetTileCol(Vector2 WorldPos, TileCol tileCol)
 	}
 	return false;
 }
+void ObTileMap::SetBuildingState(UINT x, UINT y, bool isActiveCol)
+{
+	if (buildingTiles[x][y]) {
+		for (size_t i = 0; i < 4; i++) {
+			for (size_t j = 0; j < 4; j++) {
+				walkableTiles[x * 4 + i][y * 4 + j] = false;
+			}
+		}
+	}
+	else {
+		for (size_t i = 0; i < 4; i++) {
+			for (size_t j = 0; j < 4; j++) {
+				//if (Tiles[x * 4 + i][y * 4 + j].state)
+					walkableTiles[x * 4 + i][y * 4 + j] = true;
+			}
+		}
+	}
+}
+void ObTileMap::UpdateBuildingState(ObTileMap* dynamicMap, bool isActiveCol)
+{
+	for (size_t i = 0; i < dynamicMap->tileSize.x; i++)
+	{
+		for (size_t j = 0; j < dynamicMap->tileSize.y; j++)
+		{
+			if (isActiveCol && !dynamicMap->walkableTiles[i][j])
+			{
+				buildingTiles[i][j] = true;
+			}
+			else
+			{
+				buildingTiles[i][j] = false;
+			}
+			// buildingState 크기에 맞춰 walkableTiles 갱신
+			SetBuildingState(i, j, isActiveCol);
+		}
+	}
+}
 
 
 
@@ -432,7 +469,7 @@ void ObTileMap::CreateTileState()
 }
 
 void ObTileMap::ClusterResize()
-{	
+{
 	cluster.resize(128 * 4 / CLUSTER_SCALE);
 	for (size_t i = 0; i < 128 * 4 / CLUSTER_SCALE; i++)
 	{

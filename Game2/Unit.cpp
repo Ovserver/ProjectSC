@@ -13,11 +13,11 @@ void Unit::InitWireframes()
 	Utility2::InitImage(*UnitWireframe[UnitName::ZEALOT], L"unit/wireframe/wireZealot.png", Vector2());
 }
 Unit::Unit(UnitType _unitType, UnitName _unitName)
-{	
-	unitName = _unitName; 
+{
+	unitName = _unitName;
 	unitType = _unitType;
 	unitState = UnitState::IDLE;
-	
+
 	maxHp = 100;
 	hp = maxHp;
 	atkDamage = 20;
@@ -26,24 +26,7 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 	col.isFilled = false;
 	targetCmdUnit = nullptr;
 
-	attackRange = 3;
-	sightRange = 6;
-
-	Utility2::InitImage(spriteIdle, L"unit/zealotMove.png", Vector2(), 9, 8);
-	spriteIdle.SetParentRT(col);
-
-	Utility2::InitImage(spriteMove, L"unit/zealotMove.png", Vector2(), 9, 8);
-	spriteMove.SetParentRT(col);
-
-	Utility2::InitImage(spriteAttack, L"unit/zealotAttack.png", Vector2(), 9, 5);
-	spriteAttack.SetParentRT(col);
-
-	Utility2::InitImage(spriteDeath, L"unit/zealotDeath.png", Vector2(), 7);
-	//spriteDeath.isVisible = false;
-	spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
-	spriteDeath.SetParentRT(col);
-
-	deathTime = 7 * FRAME(18);
+	InitUnitImage();
 
 	dirFrameX[A0000] = 0;
 	dirFrameX[A0225] = 1;
@@ -55,9 +38,8 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 	dirFrameX[A1575] = 7;
 	dirFrameX[A1800] = 8;
 
-	
-	col.SetScale() = spriteMove.GetScale();
-	moveSpeed = 200;
+
+	col.SetScale() = spriteIdle.GetScale();
 
 	tickAttackCooldown = attackCooldown;
 	tickPathUpdateTime = PathUpdateTime;
@@ -74,6 +56,23 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 	IconPool.iconList[i] = CmdIconList::NONE;
 
 	unitCmd = UnitCmd::STOP;
+}
+
+Unit::~Unit()
+{
+	
+}
+
+void Unit::Release()
+{
+	if (unitType == UnitType::BUILDING)
+	{
+		for (size_t i = 0; i < buildingColGrid.size(); i++)
+		{
+			SSYSTEM->DynamicGameMap->walkableTiles[buildingColGrid[i].x][buildingColGrid[i].y] = true;
+		}
+		GameMap->UpdateBuildingState(SSYSTEM->DynamicGameMap, false);
+	}
 }
 
 void Unit::Update()
@@ -148,7 +147,7 @@ void Unit::Update()
 			Vector2 temp = SSYSTEM->UnitPool[i]->GetWorldPos() - GetWorldPos();
 			if (playerNum != SSYSTEM->UnitPool[i]->playerNum && temp.Length() < sightRange * TILESCALE)
 			{
-				if(!targetCmdUnit)
+				if (!targetCmdUnit)
 					targetCmdUnit = SSYSTEM->UnitPool[i];
 				if (unitCmd == UnitCmd::STOP)
 				{
@@ -229,9 +228,9 @@ void Unit::Update()
 	spriteIdle.frame.x = lookDir(moveDir);
 	spriteAttack.frame.x = lookDir(moveDir);
 
-	ImGui::Text("unitState %d",unitState);
-	ImGui::Text("unitcmd %d",unitCmd);
-	ImGui::Text("targetcmdunit %d",(bool)targetCmdUnit);
+	ImGui::Text("unitState %d", unitState);
+	ImGui::Text("unitcmd %d", unitCmd);
+	ImGui::Text("targetcmdunit %d", (bool)targetCmdUnit);
 }
 
 void Unit::Render()
@@ -284,12 +283,11 @@ void Unit::InitPath2(vector<INTPAIR> way)
 
 void Unit::Death()
 {
-	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
-	{
-		spriteDeath.isVisible = true;
-		cout << "death" << endl;
-		return;
-	}
+
+	spriteDeath.isVisible = true;
+	cout << "death" << endl;
+	return;
+
 }
 
 void Unit::Move(Vector2 CommandPos)
@@ -350,6 +348,63 @@ void Unit::Stop2()
 	tickPathUpdateTime = PathUpdateTime;
 	targetCmdUnit = nullptr;
 	cout << "Command Stop " << endl;
+}
+
+void Unit::InitUnitImage()
+{
+	switch (unitName)
+	{
+	case UnitName::UNUSED:
+		break;
+	case UnitName::ZEALOT:
+		attackRange = 3;
+		sightRange = 6;
+
+		Utility2::InitImage(spriteIdle, L"unit/zealotMove.png", Vector2(), 9, 8);
+		spriteIdle.SetParentRT(col);
+
+		Utility2::InitImage(spriteMove, L"unit/zealotMove.png", Vector2(), 9, 8);
+		spriteMove.SetParentRT(col);
+
+		Utility2::InitImage(spriteAttack, L"unit/zealotAttack.png", Vector2(), 9, 5);
+		spriteAttack.SetParentRT(col);
+
+		Utility2::InitImage(spriteDeath, L"unit/zealotDeath.png", Vector2(), 7);
+
+		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
+		spriteDeath.SetParentRT(col);
+
+		deathTime = 7 * FRAME(18);
+
+		moveSpeed = 200;
+		break;
+	case UnitName::MARINE:
+		break;
+	case UnitName::COMMANDCENTER:
+		attackRange = 0;
+		sightRange = 0;
+
+		Utility2::InitImage(spriteIdle, L"building/cmdCenter_test.png", Vector2());
+		spriteIdle.SetParentRT(col);
+
+		Utility2::InitImage(spriteMove, L"building/cmdCenter_test.png", Vector2());
+		spriteMove.SetParentRT(col);
+
+		Utility2::InitImage(spriteAttack, L"building/cmdCenter_test.png", Vector2());
+		spriteAttack.SetParentRT(col);
+
+		Utility2::InitImage(spriteDeath, L"building/cmdCenter_test.png", Vector2());
+
+		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
+		spriteDeath.SetParentRT(col);
+
+		deathTime = 7 * FRAME(18);
+
+		moveSpeed = 0;
+		break;
+	default:
+		break;
+	}
 }
 
 int Unit::lookDir(Vector2 dir)

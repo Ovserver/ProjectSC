@@ -22,7 +22,7 @@ private:
 	Brave mainPlayer;
 	Boss boss;
 	ObTileMap map;
-	ObTileMap* mapDynamic;
+	ObTileMap* dynamicMap;
 	//플레이어가 찾아가야될 경로
 	vector<Tile*> way;
 	ObImage	cursor;
