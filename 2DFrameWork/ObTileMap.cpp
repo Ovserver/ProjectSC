@@ -291,23 +291,19 @@ void ObTileMap::SetBuildingState(UINT x, UINT y, bool isActiveCol)
 		}
 	}
 }
-void ObTileMap::UpdateBuildingState(ObTileMap* dynamicMap, bool isActiveCol)
+void ObTileMap::UpdateBuildingState(ObTileMap* dynamicMap, vector<Int2> coord, bool isActiveCol)
 {
-	for (size_t i = 0; i < dynamicMap->tileSize.x; i++)
+	for (size_t i = 0; i < coord.size(); i++)
 	{
-		for (size_t j = 0; j < dynamicMap->tileSize.y; j++)
+		if (isActiveCol && dynamicMap->walkableTiles[coord[i].x][coord[i].y])
 		{
-			if (isActiveCol && !dynamicMap->walkableTiles[i][j])
-			{
-				buildingTiles[i][j] = true;
-			}
-			else
-			{
-				buildingTiles[i][j] = false;
-			}
-			// buildingState 크기에 맞춰 walkableTiles 갱신
-			SetBuildingState(i, j, isActiveCol);
+			buildingTiles[coord[i].x][coord[i].y] = true;
 		}
+		else
+		{
+			buildingTiles[coord[i].x][coord[i].y] = false;
+		}
+		SetBuildingState(coord[i].x,coord[i].y, isActiveCol);
 	}
 }
 

@@ -71,7 +71,7 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 
 Unit::~Unit()
 {
-	
+
 }
 
 void Unit::Release()
@@ -82,7 +82,7 @@ void Unit::Release()
 		{
 			SSYSTEM->DynamicGameMap->walkableTiles[buildingColGrid[i].x][buildingColGrid[i].y] = true;
 		}
-		GameMap->UpdateBuildingState(SSYSTEM->DynamicGameMap, false);
+		GameMap->UpdateBuildingState(SSYSTEM->DynamicGameMap, buildingColGrid, false);
 	}
 }
 

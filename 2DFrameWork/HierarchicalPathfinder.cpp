@@ -213,8 +213,11 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 				{
 					flag = true;
 				}
-				if (reverse) --i; else ++i;
-				++icount;
+				else
+				{
+					if (reverse) --i; else ++i;
+					++icount;
+				}
 			}
 			int jcount = 0;
 			while (!flag && jcount < count)
@@ -225,8 +228,11 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 				{
 					flag = true;
 				}
-				if (reverse) --j; else ++j;
-				++jcount;
+				else
+				{
+					if (reverse) --j; else ++j;
+					++jcount;
+				}
 			}
 			++count;
 		}
@@ -249,8 +255,11 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 	int cost;
 
 	// case 1. 같은 Cluster 내에 있을 경우
+	cout << "case1" << endl;
 	if (startGridX == endGridX && startGridY == endGridY) {
-		tie(path, cost) = startCluster.FindInterPath(startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
+		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
+
+		//tie(path, cost) = startCluster.FindInterPath(startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
 		// 경로 존재하면 바로 리턴. 없을 경우 더 복잡한 탐색을 해야함.
 		if (cost != -1) {
 			auto t2 = chrono::high_resolution_clock::now();
@@ -259,6 +268,7 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 		}
 	}
 	// case 2. 다른 Cluster일 경우 
+	cout << "case2" << endl;
 
 	// (1)임시로 start, end node 만들기
 	// 임시 node 이므로 cluster의 nodes(node list)에 추가하지는 않을거임.
@@ -296,6 +306,7 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 	// 일정거리 이하일 경우, 일반 a* 사용한 경로로 교체
 	if (cost != -1 && cost < 700)
 	{
+		cout << "near path convert to a*find" << endl;
 		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
 	}
 	/*if (!path.empty()) {

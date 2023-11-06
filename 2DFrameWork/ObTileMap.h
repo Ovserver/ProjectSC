@@ -61,7 +61,7 @@ public:
 	ObImage* tileImages[TILESETNUM]; //타일맵 안에서 사용될 이미지4장
 	string                  file;    //저장될 이름
 	vector<vector<Tile>>    Tiles;
-	vector<vector<bool>>	walkableTiles;
+	vector<vector<bool>>	walkableTiles; //dynamic map에서 건물이 배치퇸 지형일 때 false
 	vector<vector<bool>>	buildingTiles;
 	vector<vector<Cluster*>> cluster;
 public:
@@ -90,7 +90,7 @@ public:
 	void    SetTileCol(TileCol setTileCol);
 	bool    SetTileCol(Vector2 WorldPos, TileCol tileCol);
 	// 건물 건설 후, 충돌체 설정 후처리
-	void	UpdateBuildingState(ObTileMap* dynamicMap, bool isActiveCol);
+	void	UpdateBuildingState(ObTileMap* dynamicMap, vector<Int2> coord, bool isActiveCol);
 
 	bool    PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way);
 
