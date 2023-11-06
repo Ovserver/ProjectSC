@@ -4,7 +4,8 @@ class PathFinder
 {
 public:
 	static int ApproximateDistXY(int x1, int y1, int x2, int y2);
-	static tuple<vector<INTPAIR>, int> aStarPathFind(const std::vector<std::vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y);
+	static tuple<vector<INTPAIR>, int> aStarPathFind(const vector<vector<bool>>& walkability, 
+		int start_x, int start_y, int end_x, int end_y, bool pathCorrection = false);
 };
 class Node
 {
@@ -66,7 +67,7 @@ public:
 	//world(walk map 상에서) 좌표를 받아 local 좌표로 변환한뒤 기존의 a* 알고리즘 적용.
 	//경로를 다시 world walk map상의 좌표로 변환 후 리턴. free 한경우 즉시 리턴.
 	//std::vector<std::pair<int, int>> FindInterPath(int world_start_x, int world_start_y, int world_end_x, int world_end_y)
-	tuple<vector<INTPAIR>, int> FindInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY);
+	tuple<vector<INTPAIR>, int> FindInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY, bool pathCorrection = false);
 
 public:
 	int grid_x;

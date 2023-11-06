@@ -24,6 +24,8 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 
 	playerNum = 0;
 	col.isFilled = false;
+	sightRangeCol.isFilled = false;
+	attackRangeCol.isFilled = false;
 	targetCmdUnit = nullptr;
 
 	InitUnitImage();
@@ -56,6 +58,15 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 	IconPool.iconList[i] = CmdIconList::NONE;
 
 	unitCmd = UnitCmd::STOP;
+
+	attackRangeCol.SetScale().x = attackRange;
+	attackRangeCol.SetScale().y = attackRange;
+	attackRangeCol.SetParentT(col);
+
+	sightRangeCol.SetScale().x = sightRange;
+	sightRangeCol.SetScale().y = sightRange;
+	sightRangeCol.SetParentT(col);
+
 }
 
 Unit::~Unit()
@@ -77,6 +88,7 @@ void Unit::Release()
 
 void Unit::Update()
 {
+	col.UpdateMatrix();
 	if (hp <= 0 && deathTime >= 0)
 		deathTime -= DELTA;
 	if (deathTime < 0)
@@ -144,8 +156,9 @@ void Unit::Update()
 	{
 		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
-			Vector2 temp = SSYSTEM->UnitPool[i]->GetWorldPos() - GetWorldPos();
-			if (playerNum != SSYSTEM->UnitPool[i]->playerNum && temp.Length() < sightRange * TILESCALE)
+			//Vector2 temp = SSYSTEM->UnitPool[i]->GetWorldPos() - GetWorldPos();
+			//if (playerNum != SSYSTEM->UnitPool[i]->playerNum && temp.Length() < sightRange * TILESCALE)
+			if (playerNum != SSYSTEM->UnitPool[i]->playerNum && sightRangeCol.Intersect(&SSYSTEM->UnitPool[i]->col))
 			{
 				if (!targetCmdUnit)
 					targetCmdUnit = SSYSTEM->UnitPool[i];
@@ -166,12 +179,13 @@ void Unit::Update()
 		{
 			if (targetCmdUnit->hp > 0)
 			{
-				Vector2 temp = targetCmdUnit->GetWorldPos() - GetWorldPos();
-				if (temp.Length() < attackRange * TILESCALE)
+				//Vector2 temp = targetCmdUnit->GetWorldPos() - GetWorldPos();
+				//if (temp.Length() < attackRange * TILESCALE)
+				if (attackRangeCol.Intersect(&targetCmdUnit->col))
 				{
 					unitState = UnitState::ATTACK;
 				}
-				else if (temp.Length() < sightRange * TILESCALE)
+				else if (sightRangeCol.Intersect(&targetCmdUnit->col))
 				{
 					unitState = UnitState::MOVE;
 				}
@@ -192,8 +206,8 @@ void Unit::Update()
 		{
 			if (targetCmdUnit->hp > 0)
 			{
-				Vector2 temp = targetCmdUnit->GetWorldPos() - GetWorldPos();
-				if (temp.Length() < attackRange * TILESCALE)
+				//if (temp.Length() < attackRange * TILESCALE)
+				if (attackRangeCol.Intersect(&targetCmdUnit->col))
 				{
 					unitState = UnitState::ATTACK;
 				}
@@ -256,7 +270,11 @@ void Unit::Render()
 		if (unitState == UnitState::ATTACK)
 			spriteAttack.Render();
 		if (Utility2::ShowCollider)
+		{
 			col.Render();
+			sightRangeCol.Render();
+			attackRangeCol.Render();
+		}
 	}
 	else
 	{
@@ -357,8 +375,8 @@ void Unit::InitUnitImage()
 	case UnitName::UNUSED:
 		break;
 	case UnitName::ZEALOT:
-		attackRange = 3;
-		sightRange = 6;
+		attackRange = 64 * IMGSCALE;
+		sightRange = 128 * IMGSCALE;
 
 		Utility2::InitImage(spriteIdle, L"unit/zealotMove.png", Vector2(), 9, 8);
 		spriteIdle.SetParentRT(col);

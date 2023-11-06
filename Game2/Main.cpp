@@ -143,8 +143,6 @@ UINT	pNumber = 0;
 Int2	int2tmp;
 void Main::Update()
 {
-
-
 	if (INPUT->KeyDown(VK_F1))
 		Utility2::ShowCollider = !Utility2::ShowCollider;
 	if (INPUT->KeyDown(VK_F2))

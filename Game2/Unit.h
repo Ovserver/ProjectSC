@@ -33,6 +33,8 @@ public:
 	int				atkDamage;
 	UINT			playerNum;
 	ObRect			col;
+	ObCircle		attackRangeCol;
+	ObCircle		sightRangeCol;
 	Vector2			cmdPos;
 	Vector2			originPos;
 	vector<Tile*>	pathWay;

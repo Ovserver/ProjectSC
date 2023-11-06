@@ -9,7 +9,7 @@ int PathFinder::ApproximateDistXY(int x1, int y1, int x2, int y2)
 	return e1 * 10 + e2 * 14;
 }
 
-tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const vector<vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y)
+tuple<vector<INTPAIR>, int> PathFinder::aStarPathFind(const vector<vector<bool>>& walkability, int start_x, int start_y, int end_x, int end_y, bool pathCorrection)
 {
 	if (start_x == end_x && start_y == end_y)
 	{
@@ -144,7 +144,7 @@ void Cluster::FindInterPathOfAllNodes()
 	}
 }
 
-tuple<vector<INTPAIR>, int> Cluster::FindInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY)
+tuple<vector<INTPAIR>, int> Cluster::FindInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY, bool pathCorrection)
 {
 	int x_offset = grid_x * CLUSTER_SCALE;
 	int y_offset = grid_y * CLUSTER_SCALE;
@@ -161,7 +161,7 @@ tuple<vector<INTPAIR>, int> Cluster::FindInterPath(int worldStartX, int worldSta
 
 	int cost;
 	vector<INTPAIR> local_path;
-	tie(local_path, cost) = PathFinder::aStarPathFind(walkability, local_start_x, local_start_y, local_end_x, local_end_y);
+	tie(local_path, cost) = PathFinder::aStarPathFind(walkability, local_start_x, local_start_y, local_end_x, local_end_y, pathCorrection);
 
 	if (local_path.empty()) {
 		return make_tuple(local_path, cost);
