@@ -97,6 +97,13 @@ void Unit::Update()
 		SSYSTEM->UnitPoolDelete.push_back(this);
 		return;
 	}
+	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
+	{
+		if (SSYSTEM->UnitPool[i]->col.Intersect(&col))
+		{
+			
+		}
+	}
 	if (unitState == UnitState::MOVE)
 	{
 		if (TIMER->GetTick(tickPathUpdateTime, PathUpdateTime))

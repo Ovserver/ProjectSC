@@ -275,6 +275,7 @@ bool ObTileMap::SetTileCol(Vector2 WorldPos, TileCol tileCol)
 }
 void ObTileMap::SetBuildingState(UINT x, UINT y, bool isActiveCol)
 {
+	cout << buildingTiles[x][y] << endl;
 	if (buildingTiles[x][y]) {
 		for (size_t i = 0; i < 4; i++) {
 			for (size_t j = 0; j < 4; j++) {
@@ -286,7 +287,7 @@ void ObTileMap::SetBuildingState(UINT x, UINT y, bool isActiveCol)
 		for (size_t i = 0; i < 4; i++) {
 			for (size_t j = 0; j < 4; j++) {
 				//if (Tiles[x * 4 + i][y * 4 + j].state)
-					walkableTiles[x * 4 + i][y * 4 + j] = true;
+				walkableTiles[x * 4 + i][y * 4 + j] = true;
 			}
 		}
 	}
@@ -295,7 +296,7 @@ void ObTileMap::UpdateBuildingState(ObTileMap* dynamicMap, vector<Int2> coord, b
 {
 	for (size_t i = 0; i < coord.size(); i++)
 	{
-		if (isActiveCol && dynamicMap->walkableTiles[coord[i].x][coord[i].y])
+		if (isActiveCol && !dynamicMap->walkableTiles[coord[i].x][coord[i].y])
 		{
 			buildingTiles[coord[i].x][coord[i].y] = true;
 		}
@@ -303,7 +304,7 @@ void ObTileMap::UpdateBuildingState(ObTileMap* dynamicMap, vector<Int2> coord, b
 		{
 			buildingTiles[coord[i].x][coord[i].y] = false;
 		}
-		SetBuildingState(coord[i].x,coord[i].y, isActiveCol);
+		SetBuildingState(coord[i].x, coord[i].y, isActiveCol);
 	}
 }
 
@@ -454,8 +455,10 @@ void ObTileMap::CreateTileState()
 	for (size_t i = 0; i < Tiles.size(); i++)
 	{
 		walkableTiles.push_back(vector<bool>());
+		unitTiles.push_back(vector<bool>());
 		for (size_t j = 0; j < Tiles[i].size(); j++)
 		{
+			unitTiles.back().push_back(true);
 			if (Tiles[i][j].state == TILE_NONE)
 				walkableTiles.back().push_back(true);
 			else

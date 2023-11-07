@@ -63,10 +63,9 @@ public:
 
 	//모든 entrace_node의 path를 계산.
 	void FindInterPathOfAllNodes();
-
+	
 	//world(walk map 상에서) 좌표를 받아 local 좌표로 변환한뒤 기존의 a* 알고리즘 적용.
 	//경로를 다시 world walk map상의 좌표로 변환 후 리턴. free 한경우 즉시 리턴.
-	//std::vector<std::pair<int, int>> FindInterPath(int world_start_x, int world_start_y, int world_end_x, int world_end_y)
 	tuple<vector<INTPAIR>, int> FindInterPath(int worldStartX, int worldStartY, int worldEndX, int worldEndY, bool pathCorrection = false);
 
 public:

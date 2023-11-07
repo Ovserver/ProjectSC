@@ -63,6 +63,9 @@ public:
 	vector<vector<Tile>>    Tiles;
 	vector<vector<bool>>	walkableTiles; //dynamic map에서 건물이 배치퇸 지형일 때 false
 	vector<vector<bool>>	buildingTiles;
+	//유닛이 정지했을 때, 장애물 설정. 유닛이 이동중일 때는 장애물 해제한 뒤 경로이동하되, 
+	//다른 유닛과 충돌할 경우 서로 밀어낸 뒤 다음 재경로 요청
+	vector<vector<bool>>	unitTiles;		
 	vector<vector<Cluster*>> cluster;
 public:
 	ObTileMap(int tileSizeX = 4 * 128, int tileSizeY = 4 * 128, Vector2 tileScale = Vector2(TILESCALE, TILESCALE) * IMGSCALE / 4.0f);
