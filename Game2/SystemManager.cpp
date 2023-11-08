@@ -390,7 +390,7 @@ bool SystemManager::CreateBuilding(UnitType unitType, UnitName unitName, ObRect*
 		DynamicGameMap->walkableTiles[int2tmp.x][int2tmp.y] = false;
 		temp->buildingColGrid.push_back(int2tmp);
 	}
-	GameMap->UpdateBuildingState(DynamicGameMap,temp->buildingColGrid, true);
+	GameMap->UpdateBuildingTiles(DynamicGameMap,temp->buildingColGrid, true);
 	UnitPool.push_back(temp);
 	return true;
 }

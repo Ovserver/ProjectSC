@@ -28,9 +28,11 @@ public:
 	static ObTileMap* GameMap;
 	static map<UnitName, ObImage*> UnitWireframe;
 	bool			pathfinding = false;
+	bool			stuck = false;
 	float			attackRange;
 	float			sightRange;
 	int				atkDamage;
+	float			stuckTime = 0;
 	UINT			playerNum;
 	ObRect			col;
 	ObCircle		attackRangeCol;
@@ -40,6 +42,7 @@ public:
 	vector<Tile*>	pathWay;
 	vector<INTPAIR>	pathWay2;
 	Unit*			targetCmdUnit;
+	Unit*			stuckedUnit;
 	CmdIconPool		IconPool;
 	UnitName		unitName;
 	vector<Int2>	buildingColGrid;

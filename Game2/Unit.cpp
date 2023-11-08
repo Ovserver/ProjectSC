@@ -42,6 +42,12 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 
 
 	col.SetScale() = spriteIdle.GetScale();
+	if (unitName == UnitName::ZEALOT)
+	{
+		col.SetScale().x = 7 * IMGSCALE;
+		col.SetScale().y = 7 * IMGSCALE;
+
+	}
 
 	tickAttackCooldown = attackCooldown;
 	tickPathUpdateTime = PathUpdateTime;
@@ -82,7 +88,7 @@ void Unit::Release()
 		{
 			SSYSTEM->DynamicGameMap->walkableTiles[buildingColGrid[i].x][buildingColGrid[i].y] = true;
 		}
-		GameMap->UpdateBuildingState(SSYSTEM->DynamicGameMap, buildingColGrid, false);
+		GameMap->UpdateBuildingTiles(SSYSTEM->DynamicGameMap, buildingColGrid, false);
 	}
 }
 
@@ -97,11 +103,22 @@ void Unit::Update()
 		SSYSTEM->UnitPoolDelete.push_back(this);
 		return;
 	}
-	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
+	if (unitState == UnitState::IDLE)
+		SSYSTEM->GameMap->UpdateUnitTiles(col.GetWorldPos(), true);
+	else
+		SSYSTEM->GameMap->UpdateUnitTiles(col.GetWorldPos(), false);
+	stuck = false;
+	if (unitState != UnitState::IDLE)
 	{
-		if (SSYSTEM->UnitPool[i]->col.Intersect(&col))
+		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
-			
+			vector<Unit*> tempPool = SSYSTEM->UnitPool;
+			if (tempPool[i] != this && tempPool[i]->col.Intersect(&col))
+			{
+				stuckedUnit = tempPool[i];
+				stuck = true;
+				break;
+			}
 		}
 	}
 	if (unitState == UnitState::MOVE)
@@ -129,8 +146,33 @@ void Unit::Update()
 			else
 			{
 				InitPath2(pathWay2);
+				cout << "initPath\n";
 			}
 		}
+	}
+	if (stuck)
+	{		
+		Vector2 vectors = stuckedUnit->col.GetWorldPos() - col.GetWorldPos();
+		vectors.Normalize();
+		/*float angle = atan2(vectors.y, vectors.x);
+		if (angle >= 0 && angle < 90)
+			vectors = Vector2(1, 1);
+		else if(angle >= 90 < angle <= 180)
+			vectors = Vector2(-1, 1);
+		else if(angle >= -90 && angle < 0)
+			vectors = Vector2(1, -1);
+		else if(angle >= -180 && angle < -90)
+			vectors = Vector2(-1, -1);*/
+		
+		col.MoveWorldPos(moveSpeed * vectors * -1 * DELTA);
+		stuckTime += DELTA;
+		if (stuckTime >= 0.5f)
+		{
+			stuckTime = 0;
+			tickPathUpdateTime = PathUpdateTime;
+			cout << "recuit path" << endl;
+		}
+		return;
 	}
 	if (pathfinding)
 	{

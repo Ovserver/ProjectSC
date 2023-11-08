@@ -65,7 +65,7 @@ public:
 	vector<vector<bool>>	buildingTiles;
 	//유닛이 정지했을 때, 장애물 설정. 유닛이 이동중일 때는 장애물 해제한 뒤 경로이동하되, 
 	//다른 유닛과 충돌할 경우 서로 밀어낸 뒤 다음 재경로 요청
-	vector<vector<bool>>	unitTiles;		
+	vector<vector<bool>>	unitTiles;
 	vector<vector<Cluster*>> cluster;
 public:
 	ObTileMap(int tileSizeX = 4 * 128, int tileSizeY = 4 * 128, Vector2 tileScale = Vector2(TILESCALE, TILESCALE) * IMGSCALE / 4.0f);
@@ -93,7 +93,8 @@ public:
 	void    SetTileCol(TileCol setTileCol);
 	bool    SetTileCol(Vector2 WorldPos, TileCol tileCol);
 	// 건물 건설 후, 충돌체 설정 후처리
-	void	UpdateBuildingState(ObTileMap* dynamicMap, vector<Int2> coord, bool isActiveCol);
+	void	UpdateBuildingTiles(ObTileMap* dynamicMap, vector<Int2> coord, bool isActiveCol);
+	void	UpdateUnitTiles(Vector2 WorldPos, bool isActiveCol);
 
 	bool    PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way);
 
