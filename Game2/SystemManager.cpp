@@ -142,7 +142,7 @@ void SystemManager::UpdateTileCol()
 	GameMap->SetTileCol(TileCol::NONE);
 	for (size_t i = 0; i < UnitPool.size(); i++)
 	{
-		GameMap->SetTileCol(UnitPool[i]->GetWorldPos(), TileCol::UNIT);
+		GameMap->SetTileCol(UnitPool[i]->GetWorldPos(), TileCol::GROUNDUNIT);
 	}
 }
 

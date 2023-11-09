@@ -11,6 +11,8 @@ void Unit::InitWireframes()
 	Utility2::InitImage(*UnitWireframe[UnitName::UNUSED], L"unit/wireframe/wireUnused.png", Vector2());
 	UnitWireframe[UnitName::ZEALOT] = new ObImage();
 	Utility2::InitImage(*UnitWireframe[UnitName::ZEALOT], L"unit/wireframe/wireZealot.png", Vector2());
+	UnitWireframe[UnitName::DEVOURER] = new ObImage();
+	Utility2::InitImage(*UnitWireframe[UnitName::DEVOURER], L"unit/wireframe/wireDevourer.png", Vector2());
 }
 Unit::Unit(UnitType _unitType, UnitName _unitName)
 {
@@ -42,7 +44,7 @@ Unit::Unit(UnitType _unitType, UnitName _unitName)
 
 
 	col.SetScale() = spriteIdle.GetScale();
-	if (unitName == UnitName::ZEALOT)
+	if (unitType == UnitType::GROUNDUNIT || unitType == UnitType::AIRUNIT)
 	{
 		col.SetScale().x = 7 * IMGSCALE;
 		col.SetScale().y = 7 * IMGSCALE;
@@ -107,8 +109,7 @@ void Unit::Update()
 		SSYSTEM->GameMap->UpdateUnitTiles(col.GetWorldPos(), true);
 	else
 		SSYSTEM->GameMap->UpdateUnitTiles(col.GetWorldPos(), false);
-	stuck = false;
-	if (unitState != UnitState::IDLE)
+	if (!stuck && unitState != UnitState::IDLE)
 	{
 		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
@@ -125,7 +126,6 @@ void Unit::Update()
 	{
 		if (TIMER->GetTick(tickPathUpdateTime, PathUpdateTime))
 		{
-			vector<Tile*> temp;
 			Vector2	commandPostemp;
 
 			if (unitCmd == UnitCmd::ATTACK)
@@ -137,63 +137,81 @@ void Unit::Update()
 			}
 			else if (unitCmd == UnitCmd::MOVE) commandPostemp = cmdPos;
 			// pathfinding을 특정 이벤트 발생 시 갱신하도록 함수화 하여 수정하기
-			pathWay2 = PFINDER->FindCompletePath(*GameMap, GetWorldPos(), commandPostemp);
-			if (pathWay2.empty())
+			if (unitType == UnitType::GROUNDUNIT)
 			{
-				Stop2();
-				cout << "pathClear\n";
+				pathWay2 = PFINDER->FindCompletePath(*GameMap, GetWorldPos(), commandPostemp);
+				if (pathWay2.empty())
+				{
+					Stop2();
+					cout << "pathClear\n";
+				}
+				else
+				{
+					InitPath2(pathWay2);
+					cout << "initPath\n";
+				}
 			}
-			else
+			else if (unitType == UnitType::AIRUNIT)
 			{
 				InitPath2(pathWay2);
-				cout << "initPath\n";
+				cout << "initAirPath\n";
 			}
 		}
 	}
 	if (stuck)
-	{		
-		Vector2 vectors = stuckedUnit->col.GetWorldPos() - col.GetWorldPos();
-		vectors.Normalize();
-		/*float angle = atan2(vectors.y, vectors.x);
-		if (angle >= 0 && angle < 90)
-			vectors = Vector2(1, 1);
-		else if(angle >= 90 < angle <= 180)
-			vectors = Vector2(-1, 1);
-		else if(angle >= -90 && angle < 0)
-			vectors = Vector2(1, -1);
-		else if(angle >= -180 && angle < -90)
-			vectors = Vector2(-1, -1);*/
-		
-		col.MoveWorldPos(moveSpeed * vectors * -1 * DELTA);
-		stuckTime += DELTA;
-		if (stuckTime >= 0.5f)
+	{
+		if (unitType == UnitType::GROUNDUNIT)
 		{
-			stuckTime = 0;
-			tickPathUpdateTime = PathUpdateTime;
-			cout << "recuit path" << endl;
+			Vector2 vectors = stuckedUnit->col.GetWorldPos() - col.GetWorldPos();
+			vectors.Normalize();
+
+			col.MoveWorldPos(moveSpeed * vectors * -1 * DELTA);
+			stuckTime += DELTA;
+			if (stuckTime >= 0.2f)
+			{
+				stuckTime = 0;
+				stuck = false;
+				tickPathUpdateTime = PathUpdateTime;
+				cout << "recruit path" << endl;
+			}
+			return;
 		}
-		return;
 	}
 	if (pathfinding)
 	{
 		if (unitState == UnitState::MOVE)
 		{
-			if (pathWay2.empty())
+			if (unitType == UnitType::GROUNDUNIT)
 			{
-				Stop2();
-				return;
+				if (pathWay2.empty())
+				{
+					Stop2();
+					return;
+				}
+				moveDir = Vector2(pathWay2.back().first, pathWay2.back().second) - col.GetWorldPos();
+				if (moveDir.Length() > moveSpeed * DELTA)
+				{
+					moveDir.Normalize();
+					col.MoveWorldPos(moveDir * moveSpeed * DELTA);
+					lookDir(moveDir);
+				}
+				else
+				{
+					col.SetWorldPos(Vector2(pathWay2.back().first, pathWay2.back().second));
+					pathWay2.pop_back();
+				}
 			}
-			moveDir = Vector2(pathWay2.back().first, pathWay2.back().second) - col.GetWorldPos();
-			if (moveDir.Length() > moveSpeed * DELTA)
+			else if (unitType == UnitType::AIRUNIT)
 			{
+				moveDir = cmdPos - col.GetWorldPos();
+				if (moveDir.Length() <= moveSpeed * DELTA)
+				{
+					Stop2();
+					return;
+				}
 				moveDir.Normalize();
 				col.MoveWorldPos(moveDir * moveSpeed * DELTA);
 				lookDir(moveDir);
-			}
-			else
-			{
-				col.SetWorldPos(Vector2(pathWay2.back().first, pathWay2.back().second));
-				pathWay2.pop_back();
 			}
 		}
 		else if (unitState == UnitState::IDLE)
@@ -446,6 +464,28 @@ void Unit::InitUnitImage()
 		moveSpeed = 200;
 		break;
 	case UnitName::MARINE:
+		break;
+	case UnitName::DEVOURER:
+		attackRange = 64 * IMGSCALE;
+		sightRange = 128 * IMGSCALE;
+
+		Utility2::InitImage(spriteIdle, L"unit/devourerMove.png", Vector2(), 9, 6);
+		spriteIdle.SetParentRT(col);
+
+		Utility2::InitImage(spriteMove, L"unit/devourerMove.png", Vector2(), 9, 6);
+		spriteMove.SetParentRT(col);
+
+		Utility2::InitImage(spriteAttack, L"unit/devourerAttack.png", Vector2(), 9, 7);
+		spriteAttack.SetParentRT(col);
+
+		Utility2::InitImage(spriteDeath, L"unit/devourerDeath.png", Vector2(), 9);
+
+		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
+		spriteDeath.SetParentRT(col);
+
+		deathTime = 9 * FRAME(18);
+
+		moveSpeed = 150;
 		break;
 	case UnitName::COMMANDCENTER:
 		attackRange = 0;

@@ -162,12 +162,23 @@ void Main::Update()
 		if (INPUT->KeyDown('5'))
 			app.maincam->SetWorldPos(Vector2(TILESCALE * 112, TILESCALE * 112) * IMGSCALE);
 	}
-	if (INPUT->KeyDown(VK_F5))
+	if (INPUT->KeyPress(VK_F5))
 	{
-		Unit* temp = new Unit();
-		temp->SetWorldPos(INPUT->GetWorldMousePos());
-		temp->playerNum = 0;
-		SSYSTEM->UnitPool.push_back(temp);
+		if (INPUT->KeyDown('1'))
+		{
+			Unit* temp = new Unit();
+			temp->SetWorldPos(INPUT->GetWorldMousePos());
+			temp->playerNum = 0;
+			SSYSTEM->UnitPool.push_back(temp);
+		}
+		if (INPUT->KeyDown('2'))
+		{
+			Unit* temp = new Unit(UnitType::AIRUNIT, UnitName::DEVOURER);
+			temp->SetWorldPos(INPUT->GetWorldMousePos());
+			temp->playerNum = 0;
+			SSYSTEM->UnitPool.push_back(temp);
+		}
+
 	}
 	if (INPUT->KeyDown(VK_F6))
 	{

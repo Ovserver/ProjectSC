@@ -16,7 +16,7 @@ enum TileState
 };
 enum class TileCol
 {
-	NONE, UNIT, BUILDING, NEUTRAL
+	NONE, GROUNDUNIT, BUILDING, NEUTRAL
 };
 struct TileInt2
 {

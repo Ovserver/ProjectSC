@@ -4,7 +4,7 @@ class Unit
 {
 public:
 	static void InitWireframes();
-	Unit(UnitType _unitType = UnitType::UNIT, UnitName _unitName = UnitName::ZEALOT);
+	Unit(UnitType _unitType = UnitType::GROUNDUNIT, UnitName _unitName = UnitName::ZEALOT);
 	~Unit();
 	void Release();
 	void Update();

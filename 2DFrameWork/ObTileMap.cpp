@@ -516,7 +516,7 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 			while (!flag && icount < count)
 			{
 				if (!(Tiles[dest.x + i][dest.y + j].state == TILE_WALL ||
-					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::UNIT))
+					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::GROUNDUNIT))
 				{
 					flag = true;
 				}
@@ -527,7 +527,7 @@ bool ObTileMap::PathFinding(Int2 sour, Int2 dest, OUT vector<Tile*>& way)
 			while (!flag && jcount < count)
 			{
 				if (!(Tiles[dest.x + i][dest.y + j].state == TILE_WALL ||
-					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::UNIT))
+					Tiles[dest.x + i][dest.y + j].tileColInfo == TileCol::GROUNDUNIT))
 				{
 					flag = true;
 				}
