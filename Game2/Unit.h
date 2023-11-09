@@ -33,6 +33,7 @@ public:
 	float			sightRange;
 	int				atkDamage;
 	float			stuckTime = 0;
+	float			orderCancelTime = 0;
 	UINT			playerNum;
 	ObRect			col;
 	ObCircle		attackRangeCol;
@@ -45,6 +46,7 @@ public:
 	Unit*			stuckedUnit;
 	CmdIconPool		IconPool;
 	UnitName		unitName;
+	UnitType		unitType;
 	vector<Int2>	buildingColGrid;
 protected:
 	int				dirFrameX[9];
@@ -54,7 +56,6 @@ protected:
 	Vector2			moveDir;
 
 	UnitState		unitState;
-	UnitType		unitType;
 
 	ObImage			spriteIdle;
 	ObImage			spriteMove;
@@ -63,6 +64,7 @@ protected:
 private:
 	void InitUnitImage();
 private:
+	Vector2			shadowPos;
 	float			deathTime;
 	int				hp;
 	int				maxHp;

@@ -307,7 +307,7 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 	if (cost != -1 && cost < 700)
 	{
 		cout << "near path convert to a*find" << endl;
-		//tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
+		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
 	}
 	/*if (!path.empty()) {
 		clock_t t3 = clock();

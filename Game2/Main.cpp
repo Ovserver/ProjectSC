@@ -178,14 +178,23 @@ void Main::Update()
 			temp->playerNum = 0;
 			SSYSTEM->UnitPool.push_back(temp);
 		}
-
 	}
-	if (INPUT->KeyDown(VK_F6))
+	if (INPUT->KeyPress(VK_F6))
 	{
-		Unit* temp = new Unit();
-		temp->SetWorldPos(INPUT->GetWorldMousePos());
-		temp->playerNum = 1;
-		SSYSTEM->UnitPool.push_back(temp);
+		if (INPUT->KeyDown('1'))
+		{
+			Unit* temp = new Unit();
+			temp->SetWorldPos(INPUT->GetWorldMousePos());
+			temp->playerNum = 1;
+			SSYSTEM->UnitPool.push_back(temp);
+		}
+		if (INPUT->KeyDown('2'))
+		{
+			Unit* temp = new Unit(UnitType::AIRUNIT, UnitName::DEVOURER);
+			temp->SetWorldPos(INPUT->GetWorldMousePos());
+			temp->playerNum = 1;
+			SSYSTEM->UnitPool.push_back(temp);
+		}
 	}
 	if (INPUT->KeyDown(VK_F7))
 	{
@@ -330,23 +339,6 @@ void Main::LateUpdate()
 				SSYSTEM->UnitPoolSelect[i]->Move(INPUT->GetWorldMousePos());
 			}
 		}
-	}
-	for (int i = 0; i < way.size(); i++)
-	{
-		ImGui::Text("%d path  X : %f Y : %f", i, way[i]->Pos.x, way[i]->Pos.y);
-	}
-	if (map.GetTileState((mainPlayer.GetFoot())) == TILE_NONE)
-	{
-		ImGui::Text("NONE");
-	}
-	if (map.GetTileState((mainPlayer.GetFoot())) == TILE_WALL)
-	{
-		mainPlayer.StepBack();
-	}
-	ImGui::Text("pathway");
-	for (size_t i = 0; i < pathway.size(); i++)
-	{
-		ImGui::Text("%d %d", pathway[i].first, pathway[i].second);
 	}
 	//ImGui::Text("AreaScale\n%f %f", SelectArea.GetScale().x, SelectArea.GetScale().y);
 	//ImGui::Text("AreaWorldPos\n%f %f", SelectArea.GetWorldPos().x, SelectArea.GetWorldPos().y);

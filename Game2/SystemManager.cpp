@@ -62,6 +62,19 @@ void SystemManager::Update()
 	temp.x -= app.GetHalfWidth(); temp.y -= app.GetHalfHeight(); temp.y *= -1;
 	if (!SelectMode)
 	{
+		if(INPUT->KeyDown('S'))
+		{
+			CmdExecute(CmdIconList::STOP);
+		}
+		if(INPUT->KeyDown('H'))
+		{
+			CmdExecute(CmdIconList::HOLD);
+		}
+		if(INPUT->KeyDown('A'))
+		{
+			cmdIconsNum = 2;
+			CmdPosSelectMod();
+		}
 		if (INPUT->KeyUp(VK_LBUTTON))
 		{
 			for (size_t i = 0; i < NUM_CMDICON; i++)
@@ -106,17 +119,17 @@ void SystemManager::Render()
 	for (size_t i = 0; i < UnitPool.size(); i++)
 	{
 		UnitPool[i]->col.color = Color(1, 1, 1);
+		if (UnitPool[i]->unitType != UnitType::AIRUNIT)
+			UnitPool[i]->Render();
 	}
 	for (size_t i = 0; i < UnitPool.size(); i++)
 	{
-		UnitPool[i]->Render();
+		if (UnitPool[i]->unitType == UnitType::AIRUNIT)
+			UnitPool[i]->Render();
 	}
 	for (size_t i = 0; i < UnitPoolSelect.size(); i++)
 	{
 		UnitPoolSelect[i]->col.color = Color(0, 1, 0);
-	}
-	for (size_t i = 0; i < UnitPoolSelect.size(); i++)
-	{
 		UnitPoolSelect[i]->col.Render();
 	}
 	for (size_t i = 0; i < cmdIcons.size(); i++)
@@ -390,7 +403,7 @@ bool SystemManager::CreateBuilding(UnitType unitType, UnitName unitName, ObRect*
 		DynamicGameMap->walkableTiles[int2tmp.x][int2tmp.y] = false;
 		temp->buildingColGrid.push_back(int2tmp);
 	}
-	GameMap->UpdateBuildingTiles(DynamicGameMap,temp->buildingColGrid, true);
+	GameMap->UpdateBuildingTiles(DynamicGameMap, temp->buildingColGrid, true);
 	UnitPool.push_back(temp);
 	return true;
 }

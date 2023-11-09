@@ -84,6 +84,10 @@ Unit::~Unit()
 
 void Unit::Release()
 {
+	for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
+	{
+		SSYSTEM->UnitPool[i]->stuckedUnit = nullptr;
+	}
 	if (unitType == UnitType::BUILDING)
 	{
 		for (size_t i = 0; i < buildingColGrid.size(); i++)
@@ -109,12 +113,13 @@ void Unit::Update()
 		SSYSTEM->GameMap->UpdateUnitTiles(col.GetWorldPos(), true);
 	else
 		SSYSTEM->GameMap->UpdateUnitTiles(col.GetWorldPos(), false);
-	if (!stuck && unitState != UnitState::IDLE)
+
+	if (unitType == UnitType::AIRUNIT || unitState != UnitState::IDLE)
 	{
 		for (size_t i = 0; i < SSYSTEM->UnitPool.size(); i++)
 		{
 			vector<Unit*> tempPool = SSYSTEM->UnitPool;
-			if (tempPool[i] != this && tempPool[i]->col.Intersect(&col))
+			if (tempPool[i] && tempPool[i] != this && tempPool[i]->col.Intersect(&col) && tempPool[i]->unitType == unitType)
 			{
 				stuckedUnit = tempPool[i];
 				stuck = true;
@@ -122,6 +127,7 @@ void Unit::Update()
 			}
 		}
 	}
+
 	if (unitState == UnitState::MOVE)
 	{
 		if (TIMER->GetTick(tickPathUpdateTime, PathUpdateTime))
@@ -158,7 +164,7 @@ void Unit::Update()
 			}
 		}
 	}
-	if (stuck)
+	if (stuckedUnit && stuck)
 	{
 		if (unitType == UnitType::GROUNDUNIT)
 		{
@@ -166,6 +172,16 @@ void Unit::Update()
 			vectors.Normalize();
 
 			col.MoveWorldPos(moveSpeed * vectors * -1 * DELTA);
+
+			orderCancelTime += DELTA;
+			if (orderCancelTime >= 5.0f)
+			{
+				orderCancelTime = 0;
+				stuckTime = 0;
+				stuck = false;
+				Stop2();
+				return;
+			}
 			stuckTime += DELTA;
 			if (stuckTime >= 0.2f)
 			{
@@ -175,6 +191,14 @@ void Unit::Update()
 				cout << "recruit path" << endl;
 			}
 			return;
+		}
+		else if (unitType == UnitType::AIRUNIT)
+		{
+			Vector2 vectors = stuckedUnit->col.GetWorldPos() - col.GetWorldPos();
+			vectors.Normalize();
+			col.MoveWorldPos(vectors * -10 * DELTA);
+			if (!col.Intersect(&stuckedUnit->col))
+				stuck = false;
 		}
 	}
 	if (pathfinding)
@@ -203,7 +227,12 @@ void Unit::Update()
 			}
 			else if (unitType == UnitType::AIRUNIT)
 			{
-				moveDir = cmdPos - col.GetWorldPos();
+				Vector2 dir;
+				if (targetCmdUnit)
+					dir = targetCmdUnit->GetWorldPos();
+				else
+					dir = cmdPos;
+				moveDir = dir - col.GetWorldPos();
 				if (moveDir.Length() <= moveSpeed * DELTA)
 				{
 					Stop2();
@@ -294,8 +323,8 @@ void Unit::Update()
 		if (targetCmdUnit && targetCmdUnit->hp > 0 && TIMER->GetTick(tickAttackCooldown, attackCooldown))
 		{
 			targetCmdUnit->Damage(atkDamage);
+			lookDir(targetCmdUnit->GetWorldPos() - col.GetWorldPos());
 			spriteAttack.ChangeAnim(ANIMSTATE::ONCE, FRAME(18), false);
-			ImGui::Text("attack State");
 		}
 		else
 		{
@@ -309,9 +338,7 @@ void Unit::Update()
 	spriteIdle.frame.x = lookDir(moveDir);
 	spriteAttack.frame.x = lookDir(moveDir);
 
-	ImGui::Text("unitState %d", unitState);
-	ImGui::Text("unitcmd %d", unitCmd);
-	ImGui::Text("targetcmdunit %d", (bool)targetCmdUnit);
+	ImGui::Text("stuck %d", stuck);
 }
 
 void Unit::Render()
@@ -330,12 +357,30 @@ void Unit::Render()
 			spriteMove.SetRotation().y = 0;
 			spriteAttack.SetRotation().y = 0;
 		}
+		ObImage shadowTemp;
 		if (unitState == UnitState::IDLE)
-			spriteIdle.Render();
+			shadowTemp = spriteIdle;
 		if (unitState == UnitState::MOVE)
-			spriteMove.Render();
+			shadowTemp = spriteMove;
 		if (unitState == UnitState::ATTACK)
+			shadowTemp = spriteAttack;
+		shadowTemp.color = Color(0, 0, 0, 0.2f);
+		shadowTemp.SetWorldPos(shadowTemp.GetWorldPos() + DOWN * 30);
+		shadowTemp.Render();
+		if (unitState == UnitState::IDLE)
+		{
+			spriteIdle.Render();
+			shadowTemp = spriteIdle;
+		}
+		if (unitState == UnitState::MOVE) {
+			spriteMove.Render();
+			shadowTemp = spriteMove;
+		}
+		if (unitState == UnitState::ATTACK) {
 			spriteAttack.Render();
+			shadowTemp = spriteAttack;
+		}
+
 		if (Utility2::ShowCollider)
 		{
 			col.Render();
@@ -466,10 +511,11 @@ void Unit::InitUnitImage()
 	case UnitName::MARINE:
 		break;
 	case UnitName::DEVOURER:
-		attackRange = 64 * IMGSCALE;
-		sightRange = 128 * IMGSCALE;
+		attackRange = 256 * IMGSCALE;
+		sightRange = 320 * IMGSCALE;
 
 		Utility2::InitImage(spriteIdle, L"unit/devourerMove.png", Vector2(), 9, 6);
+		spriteIdle.ChangeAnim(ANIMSTATE::LOOP, FRAME(12), false);
 		spriteIdle.SetParentRT(col);
 
 		Utility2::InitImage(spriteMove, L"unit/devourerMove.png", Vector2(), 9, 6);
@@ -479,6 +525,8 @@ void Unit::InitUnitImage()
 		spriteAttack.SetParentRT(col);
 
 		Utility2::InitImage(spriteDeath, L"unit/devourerDeath.png", Vector2(), 9);
+
+		shadowPos = DOWN * 60;
 
 		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
 		spriteDeath.SetParentRT(col);
