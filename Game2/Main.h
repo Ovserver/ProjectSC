@@ -15,8 +15,10 @@ public:
 	virtual void ResizeScreen() override;
 public:
 	bool			BuildingMode = false;
+	bool			showHelp = true;
 	bool			showCursor = false;
-	bool			showTileMap = true;
+	bool			showTileMap = false;
+	bool			showGridMap = false;
 private:
 	//타입을 몰라도 포인터는 선언가능
 	Brave mainPlayer;
@@ -29,6 +31,7 @@ private:
 	ObImage cursorDrag;
 	//아래부터 시작 시계방향
 	ObImage cursorMoveScreen[8];
+	ObImage	HelpBox;
 
 	Camera	cam2;
 	ObRect  SelectArea;

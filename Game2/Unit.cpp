@@ -13,6 +13,8 @@ void Unit::InitWireframes()
 	Utility2::InitImage(*UnitWireframe[UnitName::ZEALOT], L"unit/wireframe/wireZealot.png", Vector2());
 	UnitWireframe[UnitName::DEVOURER] = new ObImage();
 	Utility2::InitImage(*UnitWireframe[UnitName::DEVOURER], L"unit/wireframe/wireDevourer.png", Vector2());
+	UnitWireframe[UnitName::COMMANDCENTER] = new ObImage();
+	Utility2::InitImage(*UnitWireframe[UnitName::COMMANDCENTER], L"unit/wireframe/wireUnused.png", Vector2());
 }
 Unit::Unit(UnitType _unitType, UnitName _unitName)
 {
@@ -365,7 +367,9 @@ void Unit::Render()
 		if (unitState == UnitState::ATTACK)
 			shadowTemp = spriteAttack;
 		shadowTemp.color = Color(0, 0, 0, 0.2f);
-		shadowTemp.SetWorldPos(shadowTemp.GetWorldPos() + DOWN * 30);
+		shadowTemp.SetScale().x *= shadowScale.x;
+		shadowTemp.SetScale().y *= shadowScale.y;
+		shadowTemp.SetWorldPos(shadowTemp.GetWorldPos() + shadowPos);
 		shadowTemp.Render();
 		if (unitState == UnitState::IDLE)
 		{
@@ -482,6 +486,7 @@ void Unit::Stop2()
 
 void Unit::InitUnitImage()
 {
+	shadowScale = Vector2(1, 1);
 	switch (unitName)
 	{
 	case UnitName::UNUSED:
@@ -500,6 +505,9 @@ void Unit::InitUnitImage()
 		spriteAttack.SetParentRT(col);
 
 		Utility2::InitImage(spriteDeath, L"unit/zealotDeath.png", Vector2(), 7);
+
+		shadowScale = Vector2(1.5f, 0.5f);
+		shadowPos = Vector2(2, 2);
 
 		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
 		spriteDeath.SetParentRT(col);
@@ -549,6 +557,9 @@ void Unit::InitUnitImage()
 		spriteAttack.SetParentRT(col);
 
 		Utility2::InitImage(spriteDeath, L"building/cmdCenter_test.png", Vector2());
+
+		shadowScale = Vector2(0.8f, 0.5f);
+		shadowPos = Vector2(2, 2);
 
 		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));
 		spriteDeath.SetParentRT(col);

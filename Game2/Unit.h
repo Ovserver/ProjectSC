@@ -65,6 +65,7 @@ private:
 	void InitUnitImage();
 private:
 	Vector2			shadowPos;
+	Vector2			shadowScale;
 	float			deathTime;
 	int				hp;
 	int				maxHp;

@@ -72,7 +72,7 @@ void Main::Init()
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullLT.png", Vector2(), 2);
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullT.png", Vector2(), 2);
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRT.png", Vector2(), 2);
-	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullR_offset.png", Vector2(), 2);
+	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullR.png", Vector2(), 2);
 	Utility2::InitImage(cursorMoveScreen[n++], L"cursor/ScreenPullRB.png", Vector2(), 2);
 	n = 0;
 	cursorMoveScreen[n++].SetPivot() = OFFSET_B;
@@ -128,7 +128,9 @@ void Main::Init()
 			buildingImageBox[i * 3 + j].color = Color(0, 1, 0, 0.25f);
 		}
 	}
-
+	Utility2::InitImage(HelpBox, L"Help.png");
+	HelpBox.SetScale().x /= IMGSCALE;
+	HelpBox.SetScale().y /= IMGSCALE;
 	SSYSTEM->GameMap = &map;
 	SSYSTEM->DynamicGameMap = dynamicMap;
 	SSYSTEM->UICam = &cam2;
@@ -141,12 +143,32 @@ Vector2 startPos;
 vector<INTPAIR> pathway;
 UINT	pNumber = 0;
 Int2	int2tmp;
+//F1: Show Help
+//F2 + 1 : Show Unit Collider
+//F2 + 2 : Show Grid Point
+//F2 + 3 : Show Cursor
+//F3 : Show Terrain Map
+//F4 + NUM : Cam Position Set
+//F5 + 1 : Create Zealot Player1
+//F5 + 2 : Create Devourer Player1
+//F6 + 1 : Create Zealot Player2
+//F6 + 2 : Create Devourer Player2
+//F7 : Set Virtual Start Point to Pathfinding
+//F8 : Set Virtual Destination Point to Pathfinding
+//Q : Create Building CommandCenter Player1
 void Main::Update()
 {
 	if (INPUT->KeyDown(VK_F1))
-		Utility2::ShowCollider = !Utility2::ShowCollider;
-	if (INPUT->KeyDown(VK_F2))
-		ShowCursor(showCursor = !showCursor);
+		showHelp = !showHelp;
+	if (INPUT->KeyPress(VK_F2))
+	{
+		if (INPUT->KeyDown('1'))
+			Utility2::ShowCollider = !Utility2::ShowCollider;
+		if (INPUT->KeyDown('2'))
+			showGridMap = !showGridMap;
+		if (INPUT->KeyDown('3'))
+			ShowCursor(showCursor = !showCursor);
+	}
 	if (INPUT->KeyDown(VK_F3))
 		showTileMap = !showTileMap;
 	if (INPUT->KeyPress(VK_F4))
@@ -248,7 +270,7 @@ void Main::LateUpdate()
 				BuildingMode = false;
 		}
 	}
-	if (INPUT->GetScreenMousePos().y < 690)
+	//if (INPUT->GetScreenMousePos().y < 690)
 	{
 		if (INPUT->KeyDown(VK_LBUTTON))
 		{
@@ -380,17 +402,20 @@ void Main::Render()
 		{
 			if (MoveLeftScreen)
 			{
-				cursorMoveScreen[3].SetWorldPos(INPUT->GetWorldMousePos());
+				cursorMoveScreen[3].SetWorldPos(
+					Vector2(app.maincam->GetWorldPos().x - app.GetHalfWidth(), app.maincam->GetWorldPos().y + app.GetHalfHeight()));
 				cursorMoveScreen[3].Render();
 			}
 			else if (MoveRightScreen)
 			{
-				cursorMoveScreen[5].SetWorldPos(INPUT->GetWorldMousePos());
+				cursorMoveScreen[5].SetWorldPos(
+					Vector2(app.maincam->GetWorldPos().x + app.GetHalfWidth(), app.maincam->GetWorldPos().y + app.GetHalfHeight()));
 				cursorMoveScreen[5].Render();
 			}
 			else
 			{
-				cursorMoveScreen[4].SetWorldPos(INPUT->GetWorldMousePos());
+				cursorMoveScreen[4].SetWorldPos(
+					Vector2(INPUT->GetWorldMousePos().x, app.maincam->GetWorldPos().y + app.GetHalfHeight()));
 				cursorMoveScreen[4].Render();
 			}
 		}
@@ -398,28 +423,33 @@ void Main::Render()
 		{
 			if (MoveLeftScreen)
 			{
-				cursorMoveScreen[1].SetWorldPos(INPUT->GetWorldMousePos());
+				cursorMoveScreen[1].SetWorldPos(
+					Vector2(app.maincam->GetWorldPos().x - app.GetHalfWidth(), app.maincam->GetWorldPos().y - app.GetHalfHeight()));
 				cursorMoveScreen[1].Render();
 			}
 			else if (MoveRightScreen)
 			{
-				cursorMoveScreen[7].SetWorldPos(INPUT->GetWorldMousePos());
+				cursorMoveScreen[7].SetWorldPos(
+					Vector2(app.maincam->GetWorldPos().x + app.GetHalfWidth(), app.maincam->GetWorldPos().y - app.GetHalfHeight()));
 				cursorMoveScreen[7].Render();
 			}
 			else
 			{
-				cursorMoveScreen[0].SetWorldPos(INPUT->GetWorldMousePos());
+				cursorMoveScreen[0].SetWorldPos(
+					Vector2(INPUT->GetWorldMousePos().x, app.maincam->GetWorldPos().y - app.GetHalfHeight()));
 				cursorMoveScreen[0].Render();
 			}
 		}
 		else if (MoveLeftScreen)
 		{
-			cursorMoveScreen[2].SetWorldPos(INPUT->GetWorldMousePos());
+			cursorMoveScreen[2].SetWorldPos(
+				Vector2(app.maincam->GetWorldPos().x - app.GetHalfWidth(), INPUT->GetWorldMousePos().y));
 			cursorMoveScreen[2].Render();
 		}
 		else if (MoveRightScreen)
 		{
-			cursorMoveScreen[6].SetWorldPos(INPUT->GetWorldMousePos());
+			cursorMoveScreen[6].SetWorldPos(
+				Vector2(app.maincam->GetWorldPos().x + app.GetHalfWidth(), INPUT->GetWorldMousePos().y));
 			cursorMoveScreen[6].Render();
 		}
 		else
@@ -428,34 +458,37 @@ void Main::Render()
 			cursor.Render();
 		}
 	}
-	TestBox.color = Color(1, 0, 0);
-	for (size_t i = 0; i < map.cluster.size(); i++)
+
+	if (showGridMap)
 	{
-		for (size_t j = 0; j < map.cluster[i].size(); j++)
+		TestBox.color = Color(1, 0, 0);
+		for (size_t i = 0; i < map.cluster.size(); i++)
 		{
-			for (size_t k = 0; k < map.cluster[i][j]->nodes.size(); k++)
+			for (size_t j = 0; j < map.cluster[i].size(); j++)
 			{
-				Vector2 vectors;
-				vectors.x = map.cluster[i][j]->nodes[k]->x;
-				vectors.y = map.cluster[i][j]->nodes[k]->y;
-				TestBox.SetWorldPos(vectors * 16 + Vector2(8, 8));
-				TestBox.Render();
+				for (size_t k = 0; k < map.cluster[i][j]->nodes.size(); k++)
+				{
+					Vector2 vectors;
+					vectors.x = map.cluster[i][j]->nodes[k]->x;
+					vectors.y = map.cluster[i][j]->nodes[k]->y;
+					TestBox.SetWorldPos(vectors * 16 + Vector2(8, 8));
+					TestBox.Render();
+				}
 			}
 		}
-	}
-	TestBox.color = Color(0, 1, 0);
-	TestBox.SetWorldPos(startPos);
-	TestBox.Render();
-	for (size_t i = 0; i < pathway.size(); i++)
-	{
-		TestBox.color = Color((float)i / (float)(pathway.size()), (float)i / (float)(pathway.size()), 0);
-		TestBox.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
+		TestBox.color = Color(0, 1, 0);
+		TestBox.SetWorldPos(startPos);
+		TestBox.Render();
+		for (size_t i = 0; i < pathway.size(); i++)
+		{
+			TestBox.color = Color((float)i / (float)(pathway.size()), (float)i / (float)(pathway.size()), 0);
+			TestBox.SetWorldPos(Vector2(pathway[i].first, pathway[i].second));
+			TestBox.Render();
+		}
+		TestBox.color = Color(0, 1, 0);
+		TestBox.SetWorldPos(INPUT->GetWorldMousePos());
 		TestBox.Render();
 	}
-	TestBox.color = Color(0, 1, 0);
-	TestBox.SetWorldPos(INPUT->GetWorldMousePos());
-	TestBox.Render();
-
 	if (BuildingMode)
 	{
 		buildingImage.Render();
@@ -467,6 +500,11 @@ void Main::Render()
 				buildingImageBox[i].color = Color(0, 1, 0, 0.25f);
 			buildingImageBox[i].Render();
 		}
+	}
+	if (showHelp)
+	{
+		HelpBox.SetWorldPos(app.maincam->GetWorldPos() + Vector2(-300, 225));
+		HelpBox.Render();
 	}
 }
 

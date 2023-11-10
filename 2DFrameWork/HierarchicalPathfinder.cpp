@@ -254,12 +254,16 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 	vector<INTPAIR> path;
 	int cost;
 
+	// Cluster의 walkable 정보는 건물 충돌정보 미반영 상태
+	// 아래 확장된 Cluster path또한 건물의 충돌정보 미반영
+	
 	// case 1. 같은 Cluster 내에 있을 경우
 	cout << "case1" << endl;
 	if (startGridX == endGridX && startGridY == endGridY) {
-		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
 
+		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
 		//tie(path, cost) = startCluster.FindInterPath(startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
+		
 		// 경로 존재하면 바로 리턴. 없을 경우 더 복잡한 탐색을 해야함.
 		if (cost != -1) {
 			auto t2 = chrono::high_resolution_clock::now();
@@ -309,6 +313,7 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 		cout << "near path convert to a*find" << endl;
 		tie(path, cost) = PathFinder::aStarPathFind(gameMap.walkableTiles, startWalkTileX, startWalkTileY, endWalkTileX, endWalkTileY, true);
 	}
+
 	/*if (!path.empty()) {
 		clock_t t3 = clock();
 		refinedPath = RefinePath(gameMap, &startNode, &endNode, nodePath);
@@ -325,7 +330,7 @@ vector<INTPAIR> HierarchicalPathfinder::FindPathInWalkTileGrid(ObTileMap& gameMa
 	}
 
 	auto t2 = chrono::high_resolution_clock::now();
-	std::cout << "Path found at: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " microseconds" << std::endl;
+	cout << "Path found at: " << chrono::duration_cast<chrono::microseconds>(t2 - t1).count() << " microseconds" << endl;
 	return path;
 }
 

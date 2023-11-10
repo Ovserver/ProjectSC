@@ -111,7 +111,7 @@ void SystemManager::Update()
 
 void SystemManager::Render()
 {
-	console.Render(UICam);
+	
 	for (size_t i = 0; i < BuildingPool.size(); i++)
 	{
 		BuildingPool[i]->Render();
@@ -132,6 +132,7 @@ void SystemManager::Render()
 		UnitPoolSelect[i]->col.color = Color(0, 1, 0);
 		UnitPoolSelect[i]->col.Render();
 	}
+	console.Render(UICam);
 	for (size_t i = 0; i < cmdIcons.size(); i++)
 	{
 		if (cmdIcons[i])
