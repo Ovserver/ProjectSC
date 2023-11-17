@@ -228,7 +228,7 @@ void Main::Update()
 		Vector2 ttmp = INPUT->GetWorldMousePos();
 		pathway = PFINDER->FindCompletePath(map, startPos, ttmp);
 	}
-	/*if (INPUT->KeyPress(VK_LEFT))
+	if (INPUT->KeyPress(VK_LEFT))
 	{
 		app.maincam->MoveWorldPos(LEFT * 1200 * DELTA);
 	}
@@ -243,7 +243,7 @@ void Main::Update()
 	if (INPUT->KeyPress(VK_DOWN))
 	{
 		app.maincam->MoveWorldPos(DOWN * 1200 * DELTA);
-	}*/
+	}
 	if (INPUT->KeyDown('Q'))
 	{
 		if (!BuildingMode)

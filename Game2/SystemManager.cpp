@@ -79,6 +79,11 @@ void SystemManager::Update()
 			cmdIconsNum = 2;
 			CmdPosSelectMod();
 		}
+		if (INPUT->KeyDown('M'))
+		{
+			cmdIconsNum = 0;
+			CmdPosSelectMod();
+		}
 		if (INPUT->KeyUp(VK_LBUTTON))
 		{
 			for (size_t i = 0; i < NUM_CMDICON; i++)
@@ -101,7 +106,11 @@ void SystemManager::Update()
 	}
 	else
 	{
-		if (INPUT->KeyDown(VK_LBUTTON)) {
+		if (INPUT->KeyDown(VK_ESCAPE)) {
+			cmdIconsNum = 8;
+			CmdExecute();
+		}
+		else if (INPUT->KeyDown(VK_LBUTTON)) {
 			cmdPos = INPUT->GetWorldMousePos();
 			CmdExecute();
 		}
@@ -282,7 +291,7 @@ void SystemManager::CmdExecute()
 			break;
 		case CmdIconList::GATHER:
 			break;
-		case CmdIconList::CANCEL:
+		case CmdIconList::CANCEL:			
 			break;
 		case CmdIconList::NONE:
 			break;
