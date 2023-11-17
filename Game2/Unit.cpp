@@ -5,16 +5,41 @@
 
 ObTileMap* Unit::GameMap = nullptr;
 map<UnitName, ObImage*> Unit::UnitWireframe;
+map<UnitName, ObImage*> Unit::UnitPortrait;
 void Unit::InitWireframes()
 {
 	UnitWireframe[UnitName::UNUSED] = new ObImage();
 	Utility2::InitImage(*UnitWireframe[UnitName::UNUSED], L"unit/wireframe/wireUnused.png", Vector2());
+
 	UnitWireframe[UnitName::ZEALOT] = new ObImage();
-	Utility2::InitImage(*UnitWireframe[UnitName::ZEALOT], L"unit/wireframe/wireZealot.png", Vector2());
+	Utility2::InitImage(*UnitWireframe[UnitName::ZEALOT], L"unit/wireframe/newWireZealot.png", Vector2());
+	UnitWireframe[UnitName::ZEALOT]->SetScale().x /= IMGSCALE;
+	UnitWireframe[UnitName::ZEALOT]->SetScale().y /= IMGSCALE;
+
 	UnitWireframe[UnitName::DEVOURER] = new ObImage();
-	Utility2::InitImage(*UnitWireframe[UnitName::DEVOURER], L"unit/wireframe/wireDevourer.png", Vector2());
+	Utility2::InitImage(*UnitWireframe[UnitName::DEVOURER], L"unit/wireframe/newWireDevourer.png", Vector2());
+	UnitWireframe[UnitName::DEVOURER]->SetScale().x /= IMGSCALE;
+	UnitWireframe[UnitName::DEVOURER]->SetScale().y /= IMGSCALE;
+
 	UnitWireframe[UnitName::COMMANDCENTER] = new ObImage();
 	Utility2::InitImage(*UnitWireframe[UnitName::COMMANDCENTER], L"unit/wireframe/wireUnused.png", Vector2());
+}
+void Unit::InitPortrait()
+{
+	UnitPortrait[UnitName::UNUSED] = new ObImage();
+	//Utility2::InitImage(*UnitPortrait[UnitName::UNUSED], L"unit/wireframe/wireUnused.png", Vector2());
+
+	UnitPortrait[UnitName::ZEALOT] = new ObImage();
+	Utility2::InitImage(*UnitPortrait[UnitName::ZEALOT], L"unit/portrait/portzealot.png", Vector2(), 30);
+	UnitPortrait[UnitName::ZEALOT]->ChangeAnim(ANIMSTATE::LOOP, FRAME(8));
+
+	UnitPortrait[UnitName::DEVOURER] = new ObImage();
+	Utility2::InitImage(*UnitPortrait[UnitName::DEVOURER], L"unit/portrait/portdevourer.png", Vector2(), 15);
+	UnitPortrait[UnitName::DEVOURER]->ChangeAnim(ANIMSTATE::LOOP, FRAME(8));
+
+	UnitPortrait[UnitName::COMMANDCENTER] = new ObImage();
+	Utility2::InitImage(*UnitPortrait[UnitName::COMMANDCENTER], L"unit/portrait/portadvisor.png", Vector2(), 10);
+	UnitPortrait[UnitName::COMMANDCENTER]->ChangeAnim(ANIMSTATE::LOOP, FRAME(8));
 }
 Unit::Unit(UnitType _unitType, UnitName _unitName)
 {
@@ -506,7 +531,7 @@ void Unit::InitUnitImage()
 
 		Utility2::InitImage(spriteDeath, L"unit/zealotDeath.png", Vector2(), 7);
 
-		shadowScale = Vector2(1.5f, 0.5f);
+		shadowScale = Vector2(1.0f, 0.5f);
 		shadowPos = Vector2(2, 2);
 
 		spriteDeath.ChangeAnim(ANIMSTATE::ONCE, FRAME(18));

@@ -10,6 +10,7 @@ SystemManager::SystemManager()
 	UICam = nullptr;
 
 	Utility2::InitImage(console, L"console/tconsole.png");
+	Utility2::InitImage(conover, L"console/tconover.png");
 
 	Utility2::InitImage(IMOVE, L"icons/cmdiconsMove.png"); IMOVE.collider = COLLIDER::RECT;
 	Utility2::InitImage(ISTOP, L"icons/cmdiconsStop.png"); ISTOP.collider = COLLIDER::RECT;
@@ -18,6 +19,8 @@ SystemManager::SystemManager()
 	Utility2::InitImage(IHOLD, L"icons/cmdiconsHold.png"); IHOLD.collider = COLLIDER::RECT;
 	Utility2::InitImage(ICANCEL, L"icons/cmdiconsCancel.png"); ICANCEL.collider = COLLIDER::RECT;
 
+	conover.SetWorldPosX(247);
+	conover.SetWorldPosY(-396);
 	for (size_t i = 0; i < 3; i++)
 	{
 		for (size_t j = 0; j < 3; j++)
@@ -40,13 +43,14 @@ SystemManager::SystemManager()
 	}
 	SelectMode = false;
 	Utility2::InitImage(TestBox, L"Tile2.png");
+	unitPortrait = nullptr;
 	for (size_t i = 0; i < 6; i++)
 	{
 		for (size_t j = 0; j < 2; j++)
 		{
 			unitWireframePos.push_back(Vector2(
-				-app.GetHalfWidth() + (380 + i * 75),
-				app.GetHalfHeight() - (828 + j * 87)));
+				-app.GetHalfWidth() + (370 + i * 70),
+				app.GetHalfHeight() - (828 + j * 82)));
 			unitWireframe.push_back(nullptr);
 		}
 	}
@@ -106,7 +110,6 @@ void SystemManager::Update()
 	{
 		DeleteUnitPool();
 	}
-
 }
 
 void SystemManager::Render()
@@ -140,6 +143,8 @@ void SystemManager::Render()
 	}
 	if (UnitPoolSelect.size() > 0)
 	{
+		unitPortrait->SetWorldPos(conover.GetWorldPos());
+		unitPortrait->Render(UICam);
 		for (size_t i = 0; i < unitWireframe.size(); i++)
 		{
 			if (unitWireframe[i])
@@ -149,6 +154,7 @@ void SystemManager::Render()
 			}
 		}
 	}
+	conover.Render(UICam);
 }
 
 void SystemManager::UpdateTileCol()
@@ -164,6 +170,7 @@ void SystemManager::UpdateCmdIcons()
 {
 	SelectMode = false;
 	IconPoolTemp = nullptr;
+	unitPortrait = nullptr;
 	for (size_t i = 0; i < unitWireframe.size(); i++)
 	{
 		unitWireframe[i] = nullptr;
@@ -174,6 +181,7 @@ void SystemManager::UpdateCmdIcons()
 	}
 	if (!UnitPoolSelect.empty())
 	{
+		unitPortrait = Unit::UnitPortrait[UnitPoolSelect[0]->unitName];
 		for (size_t i = 0; i < UnitPoolSelect.size(); i++)
 		{
 			unitWireframe[i] = Unit::UnitWireframe[UnitPoolSelect[i]->unitName];

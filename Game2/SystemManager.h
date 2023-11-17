@@ -31,6 +31,7 @@ public:
 	bool CreateBuilding(UnitType unitType, UnitName unitName, ObRect* gridArray, UINT gridX, UINT gridY);
 public:
 	bool	SelectMode;
+
 	Camera* UICam;
 	ObImage	IMOVE;
 	ObImage	IATTACK;
@@ -39,13 +40,17 @@ public:
 	ObImage	IPATROL;
 	ObImage	ICANCEL;
 	ObImage	TestBox;
+	ObImage console;
+	ObImage	conover;
 
+	Vector2			testPos;
 	Vector2			cmdPos;
 	UINT			cmdIconsNum;
-	vector<ObImage*> cmdIcons;
+	vector<ObImage*>cmdIcons;
 	vector<Vector2> cmdIconsPos;
 	vector<ObImage*>unitWireframe;
 	vector<Vector2> unitWireframePos;
+	ObImage*		unitPortrait;
 	ObTileMap*		GameMap;
 	ObTileMap*		DynamicGameMap;
 	vector<Unit*>	UnitPool;
@@ -57,6 +62,4 @@ public:
 	CmdIconPool*	IconPoolTemp;
 	CmdIconPool*	IconPoolTempSelect;
 	CmdIconPool		IconPoolSelect;
-private:
-	ObImage console;
 };

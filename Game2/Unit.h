@@ -4,6 +4,7 @@ class Unit
 {
 public:
 	static void InitWireframes();
+	static void InitPortrait();
 	Unit(UnitType _unitType = UnitType::GROUNDUNIT, UnitName _unitName = UnitName::ZEALOT);
 	~Unit();
 	void Release();
@@ -27,6 +28,7 @@ public:
 public:
 	static ObTileMap* GameMap;
 	static map<UnitName, ObImage*> UnitWireframe;
+	static map<UnitName, ObImage*> UnitPortrait;
 	bool			pathfinding = false;
 	bool			stuck = false;
 	float			attackRange;
